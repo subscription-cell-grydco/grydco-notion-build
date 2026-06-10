@@ -706,6 +706,85 @@ async function addMeetingSample(dbId) {
   });
 }
 
+async function addWorkflowSamples(dbId) {
+  const tasks = [
+    // TL -> SMM: strategy tasks
+    { name:'June strategy — Aarni by Sharavani', to:'Tia', by:'Manika', client:'Aarni by Sharavani',
+      type:'Strategy', status:'In Progress', priority:'High',
+      start:'2025-06-01', due:'2025-06-03',
+      notes:'Strategy must be finalised before calendar build. AIDA and pillars section done. Campaigns pending.' },
+    { name:'June strategy — Gujranwala Jewellers', to:'Tia', by:'Manika', client:'Gujranwala Jewellers',
+      type:'Strategy', status:'Done', priority:'High',
+      start:'2025-05-30', due:'2025-06-02', done:'2025-06-01', revisions:0,
+      notes:'Approved by Manika. Shared with client for direction briefing.' },
+
+    // TL -> SMM: brief tasks
+    { name:'Reel brief x3 — Luminique New Season', to:'Vanshika', by:'Manika', client:'Luminique',
+      type:'Brief / Script', status:'Review', priority:'High',
+      start:'2025-06-02', due:'2025-06-04', revisions:1,
+      notes:'Revision 1 done — luxury tone updated, aspirational framing added. Sent to Manika for sign-off.' },
+
+    // SMM -> Designer: design tasks
+    { name:'4 static posts — Bhagat Jewellers June', to:'Mahima', by:'Tia', client:'Bhagat Jewellers',
+      type:'Design', status:'Not Started', priority:'Medium',
+      due:'2025-06-07',
+      notes:'Briefs ready in client folder. Pick up after Luminique posts are complete.' },
+    { name:'Beri Statement Collection — Reel edit 1', to:'Durga', by:'Vanshika', client:'Beri Jewellers',
+      type:'Design', status:'In Progress', priority:'High',
+      start:'2025-06-03', due:'2025-06-06',
+      notes:'Music: trending audio from brief. Bold cuts, fast-paced edit. Export 9:16 + 4:5.' },
+    { name:'Karan Kothari — Bridal carousel design', to:'Mahima', by:'Vanshika', client:'Karan Kothari Jewellers',
+      type:'Design', status:'Review', priority:'Medium',
+      start:'2025-06-03', due:'2025-06-06', revisions:1,
+      notes:'Revision 1: client requested gold tones, reduced text overlay. Resubmitted June 4.' },
+
+    // TL -> Ads: campaign management
+    { name:'Luminique ad spend review — June pacing', to:'Pratyusha', by:'Manika', client:'Luminique',
+      type:'Ads Management', status:'Blocked', priority:'High',
+      start:'2025-06-02', due:'2025-06-04',
+      notes:'Blocked — Meta Ads Manager access restricted. Requested from client June 2. Follow up needed.' },
+
+    // Posting + reporting
+    { name:'Post live — Aarni June 5 Reel', to:'Tia', by:'Tia', client:'Aarni by Sharavani',
+      type:'Posting', status:'Done', priority:'High',
+      start:'2025-06-05', due:'2025-06-05', done:'2025-06-05',
+      notes:'Posted 6 PM. Reached 8K views in first 2 hours. Scheduled story follow-up for next day.' },
+    { name:'Vidhi Sheth — June monthly report', to:'Tia', by:'Manika', client:'Vidhi Sheth',
+      type:'Reporting', status:'Not Started', priority:'Low',
+      due:'2025-06-30',
+      notes:'Pull data from Meta Insights at month end. Use June 2025 report template.' },
+
+    // TL internal: client communication
+    { name:'Avani brand guide v1 — TL sign-off', to:'Manika', by:'Manika', client:'Avani',
+      type:'Client Communication', status:'In Progress', priority:'High',
+      start:'2025-06-03', due:'2025-06-05',
+      notes:'Brand guide received from Studio Ink. Review and send approval or revisions to Tia by June 5.' },
+  ];
+
+  for (const t of tasks) {
+    const emoji = {Done:'✅', Blocked:'🚫', Review:'👀', 'In Progress':'🔄', 'Not Started':'⬜'}[t.status] || '🔄';
+    const props = {
+      'Task Name':   { title: [{ type:'text', text:{ content: t.name } }] },
+      'Assigned To': { select: { name: t.to } },
+      'Assigned By': { select: { name: t.by } },
+      'Client':      { select: { name: t.client } },
+      'Task Type':   { select: { name: t.type } },
+      'Status':      { select: { name: t.status } },
+      'Priority':    { select: { name: t.priority } },
+      'Notes':       { rich_text: [{ type:'text', text:{ content: t.notes } }] },
+    };
+    if (t.start)                   props['Start Date']     = { date: { start: t.start } };
+    if (t.due)                     props['Due Date']       = { date: { start: t.due } };
+    if (t.done)                    props['Completed On']   = { date: { start: t.done } };
+    if (t.revisions !== undefined) props['Revision Count'] = { number: t.revisions };
+    await api('POST', 'pages', {
+      parent: { type:'database_id', database_id: dbId },
+      icon:   { type:'emoji', emoji },
+      properties: props,
+    });
+  }
+}
+
 // ── Main ───────────────────────────────────────────────────────────────────
 async function main() {
 
@@ -895,6 +974,8 @@ async function main() {
   const wfParent = await mkPage(GS, '🔄 Workflow Tracker', '🔄');
   // DB first — the main content
   const wfDb = await createWorkflowDB(wfParent.id);
+  await addWorkflowSamples(wfDb.id);
+  log(`  10 demo tasks added`);
   // Brief note below DB
   await add(wfParent.id, [
     co('Assign tasks via Assigned By + Assigned To. Turnaround days auto-calculate when Completed On is filled. Guide is in the sub-page below.', 'ℹ️'),
