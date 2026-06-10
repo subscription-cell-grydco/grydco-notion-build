@@ -229,6 +229,160 @@ const SHOOTS = [
   {brand:"Beri Jewellers",smm:"Vanshika",type:"Reel Shoot",vendor:"Lens and Light",month:"June 2025",date:"28 Jun",delivery:"2 Jul",dateISO:"2025-06-28",deliveryISO:"2025-07-02",status:"Planned",edits:false,location:"Studio",concepts:["Statement Edit","Reel Series B"],notes:"3 reels. Confirm scripts before booking vendor."},
 ];
 
+// ── Client Journey data ────────────────────────────────────────────────────
+const JOURNEY = {
+  "Luminique": {
+    status:'🔴 Action Needed',
+    key:'Ad budget 85% spent — 2 weeks left. Lifestyle shoot Jun 25, venue TBD.',
+    phases:[
+      {phase:'Onboarding',        status:'Complete',         owner:'Manika',    notes:'Client since April 2025'},
+      {phase:'Strategy',          status:'Complete',         owner:'Vanshika',  notes:'June strategy approved May 30'},
+      {phase:'Content Calendar',  status:'Pending Approval', owner:'Vanshika',  notes:'Sent to client Jun 4 — sign-off pending'},
+      {phase:'Design / Execution',status:'In Progress',      owner:'Durga',     notes:'Warm tone revision ongoing — Jun 6 deadline'},
+      {phase:'Approvals',         status:'Pending',          owner:'Vanshika',  notes:'5 posts awaiting client approval'},
+      {phase:'Photoshoot',        status:'Confirmed',        owner:'Vanshika',  notes:'Jun 25 with Lens and Light — venue TBD'},
+      {phase:'Ads',               status:'Watch',            owner:'Pratyusha', notes:'85% budget used — Rs 47K of Rs 55K. Client access blocked.'},
+      {phase:'Reporting',         status:'Not Started',      owner:'Vanshika',  notes:'Due June 30'},
+    ],
+    current:'Warm tone revision in progress. Ad budget near limit — flag to client. Shoot venue unconfirmed.',
+  },
+  "Beri Jewellers": {
+    status:'🔴 Action Needed',
+    key:'Reel r2 pending TL review. Ad budget 73% (Rs 22K of Rs 30K).',
+    phases:[
+      {phase:'Onboarding',        status:'Complete',    owner:'Manika',    notes:'Active client'},
+      {phase:'Strategy',          status:'Complete',    owner:'Vanshika',  notes:'June strategy done'},
+      {phase:'Content Calendar',  status:'In Progress', owner:'Vanshika',  notes:'Posts 1-6 in calendar — 3 briefs pending'},
+      {phase:'Design / Execution',status:'Review',      owner:'Durga',     notes:'Reel edit r2 — waiting for Manika TL review'},
+      {phase:'Approvals',         status:'Pending',     owner:'Vanshika',  notes:'Reel r2 pending TL sign-off before client'},
+      {phase:'Photoshoot',        status:'Planned',     owner:'Vanshika',  notes:'Jun 28 with Lens and Light — scripts needed first'},
+      {phase:'Ads',               status:'Watch',       owner:'Pratyusha', notes:'73% budget used — Rs 22K of Rs 30K'},
+      {phase:'Reporting',         status:'Not Started', owner:'Vanshika',  notes:'Due June 30'},
+    ],
+    current:'Reel Series B r2 needs Manika review today. Shoot Jun 28 — confirm scripts before vendor booking.',
+  },
+  "Elmara": {
+    status:'🔴 Blocked',
+    key:'Website blocked — homepage and copy. Unblock before Jun 14. Social starts August.',
+    phases:[
+      {phase:'Onboarding',        status:'Complete',     owner:'Manika',   notes:'Active — website build phase'},
+      {phase:'Strategy',          status:'Not Started',  owner:'Vanshika', notes:'Starts August after website go-live'},
+      {phase:'Content Calendar',  status:'Not Started',  owner:'Vanshika', notes:'Activates August 2025'},
+      {phase:'Design / Execution',status:'Blocked',      owner:'Mahima',   notes:'Website homepage and copy both blocked — unblock by Jun 14'},
+      {phase:'Approvals',         status:'N/A',          owner:'—',        notes:'Social media not active yet'},
+      {phase:'Photoshoot',        status:'Not Started',  owner:'Vanshika', notes:'Plan for August launch'},
+      {phase:'Ads',               status:'N/A',          owner:'—',        notes:'Starts post website launch'},
+      {phase:'Reporting',         status:'N/A',          owner:'—',        notes:'N/A until social starts'},
+    ],
+    current:'Website BLOCKED. Homepage and copy to be resolved before June 14. PixelCraft go-live July 15.',
+  },
+  "Aarni by Sharavani": {
+    status:'🟡 Attention',
+    key:'Calendar pending approval since Jun 2. Shoot Jun 15 confirmed. Ads 42%.',
+    phases:[
+      {phase:'Onboarding',        status:'Complete',         owner:'Manika', notes:'Active client — Tia manages'},
+      {phase:'Strategy',          status:'In Progress',      owner:'Tia',    notes:'AIDA and pillars done — campaigns pending'},
+      {phase:'Content Calendar',  status:'Pending Approval', owner:'Tia',    notes:'Sent Jun 2 — client has not approved as of Jun 5'},
+      {phase:'Design / Execution',status:'In Progress',      owner:'Mahima', notes:'2 posts in design — dependent on calendar approval'},
+      {phase:'Approvals',         status:'Pending',          owner:'Tia',    notes:'Client sign-off pending since Jun 2 — follow up needed'},
+      {phase:'Photoshoot',        status:'Confirmed',        owner:'Tia',    notes:'Jun 15 with Studio Kiran — 3 collections'},
+      {phase:'Ads',               status:'On Track',         owner:'Pratyusha', notes:'42% used — Rs 27K of Rs 65K. Pacing fine.'},
+      {phase:'Reporting',         status:'Not Started',      owner:'Tia',    notes:'Due June 30'},
+    ],
+    current:'Calendar needs client approval — follow up today. Jun 15 shoot confirmed with Studio Kiran.',
+  },
+  "Avani": {
+    status:'🟡 In Progress',
+    key:'Brand guide v1 pending Manika sign-off. Social starts July.',
+    phases:[
+      {phase:'Onboarding',        status:'Complete',    owner:'Manika',   notes:'Branding project — Studio Ink partnership'},
+      {phase:'Strategy',          status:'Not Started', owner:'Tia',      notes:'Strategy starts July after brand launch'},
+      {phase:'Content Calendar',  status:'Not Started', owner:'Tia',      notes:'Activates July 2025'},
+      {phase:'Design / Execution',status:'In Progress', owner:'Manika',   notes:'Brand guide v1 received — TL review due Jun 5'},
+      {phase:'Approvals',         status:'Pending',     owner:'Manika',   notes:'Brand guide v1 pending Manika sign-off'},
+      {phase:'Photoshoot',        status:'Not Started', owner:'Tia',      notes:'Plan for July launch'},
+      {phase:'Ads',               status:'N/A',         owner:'—',        notes:'Starts July post launch'},
+      {phase:'Reporting',         status:'N/A',         owner:'—',        notes:'N/A until social starts'},
+    ],
+    current:'Manika to review brand guide v1 from Studio Ink and send feedback or approval. Social starts July.',
+  },
+  "Karan Kothari Jewellers": {
+    status:'🟡 In Progress',
+    key:'Ads draft not live yet. Shoot Jun 18. 5 posts pending approval.',
+    phases:[
+      {phase:'Onboarding',        status:'Complete',    owner:'Manika',    notes:'Active client — Vanshika manages'},
+      {phase:'Strategy',          status:'Complete',    owner:'Vanshika',  notes:'June strategy approved'},
+      {phase:'Content Calendar',  status:'In Progress', owner:'Vanshika',  notes:'9 posts + 5 stories in calendar'},
+      {phase:'Design / Execution',status:'In Progress', owner:'Mahima',    notes:'Bridal carousel r2 in progress — gold tones update'},
+      {phase:'Approvals',         status:'Pending',     owner:'Vanshika',  notes:'5 posts awaiting client approval'},
+      {phase:'Photoshoot',        status:'Confirmed',   owner:'Vanshika',  notes:'Jun 18 with Studio Kiran — bridal + plain gold'},
+      {phase:'Ads',               status:'Attention',   owner:'Pratyusha', notes:'Draft created — not live. Rs 25K budget unspent.'},
+      {phase:'Reporting',         status:'Not Started', owner:'Vanshika',  notes:'Due June 30'},
+    ],
+    current:'Ads not live — go-live needed. Jun 18 shoot confirmed. Client approval pending for 5 posts.',
+  },
+  "Bhagat Jewellers": {
+    status:'🟡 On Track',
+    key:'Calendar not yet sent. Organic only. May shoot assets ready.',
+    phases:[
+      {phase:'Onboarding',        status:'Complete',    owner:'Manika', notes:'Active client — Tia manages'},
+      {phase:'Strategy',          status:'Complete',    owner:'Tia',    notes:'June strategy done'},
+      {phase:'Content Calendar',  status:'In Progress', owner:'Tia',    notes:'6 posts + 4 stories — briefs mostly pending design'},
+      {phase:'Design / Execution',status:'Not Started', owner:'Mahima', notes:'4 static posts briefed — pick up after Luminique'},
+      {phase:'Approvals',         status:'Not Started', owner:'Tia',    notes:'Calendar not yet sent for approval'},
+      {phase:'Photoshoot',        status:'Delivered',   owner:'Tia',    notes:'May 20 shoot delivered — assets in drive'},
+      {phase:'Ads',               status:'N/A',         owner:'—',      notes:'Organic only — no ads'},
+      {phase:'Reporting',         status:'Not Started', owner:'Tia',    notes:'Due June 30'},
+    ],
+    current:'Calendar builds underway. May shoot assets available. Organic only client — no ad management.',
+  },
+  "Vidhi Sheth": {
+    status:'🟡 On Track',
+    key:'Shoot Jun 22 confirmed. Confirm venue Jun 19. Organic only.',
+    phases:[
+      {phase:'Onboarding',        status:'Complete',    owner:'Manika', notes:'Active client — Tia manages'},
+      {phase:'Strategy',          status:'Complete',    owner:'Tia',    notes:'June strategy done'},
+      {phase:'Content Calendar',  status:'In Progress', owner:'Tia',    notes:'6 posts + 3 stories — most briefs pending'},
+      {phase:'Design / Execution',status:'Not Started', owner:'Durga',  notes:'Pending briefs from calendar'},
+      {phase:'Approvals',         status:'Not Started', owner:'Tia',    notes:'First batch not yet sent'},
+      {phase:'Photoshoot',        status:'Confirmed',   owner:'Tia',    notes:'Jun 22 with Lens and Light — confirm venue Jun 19'},
+      {phase:'Ads',               status:'N/A',         owner:'—',      notes:'Organic only — no ads'},
+      {phase:'Reporting',         status:'Not Started', owner:'Tia',    notes:'Due June 30'},
+    ],
+    current:'Shoot Jun 22 confirmed — confirm Hauz Khas venue by Jun 19. Content calendar in progress.',
+  },
+  "Atul Jewellers": {
+    status:'🟢 On Track',
+    key:'Shoot assets delivered. Ads at 56%. Bridal campaign ongoing.',
+    phases:[
+      {phase:'Onboarding',        status:'Complete',    owner:'Manika',    notes:'Active client — Vanshika manages'},
+      {phase:'Strategy',          status:'Complete',    owner:'Vanshika',  notes:'June strategy approved'},
+      {phase:'Content Calendar',  status:'In Progress', owner:'Vanshika',  notes:'6 posts + 4 stories in calendar'},
+      {phase:'Design / Execution',status:'In Progress', owner:'Mahima',    notes:'Bridal carousel in design — Jun 9 target'},
+      {phase:'Approvals',         status:'Pending',     owner:'Vanshika',  notes:'2 posts awaiting client approval'},
+      {phase:'Photoshoot',        status:'Delivered',   owner:'Vanshika',  notes:'Jun 1 shoot delivered Jun 7 — assets in drive'},
+      {phase:'Ads',               status:'On Track',    owner:'Pratyusha', notes:'56% used — Rs 28K of Rs 50K. Bridal campaign live.'},
+      {phase:'Reporting',         status:'Not Started', owner:'Vanshika',  notes:'Due June 30'},
+    ],
+    current:'Shoot delivered. Bridal campaign live. Design in progress. On track for June.',
+  },
+  "Gujranwala Jewellers": {
+    status:'🟢 On Track',
+    key:'Strategy approved. July shoot planned — brief due Jun 25. Ads 40%.',
+    phases:[
+      {phase:'Onboarding',        status:'Complete',    owner:'Manika', notes:'Active client — Tia manages'},
+      {phase:'Strategy',          status:'Complete',    owner:'Tia',    notes:'June strategy approved by Manika'},
+      {phase:'Content Calendar',  status:'In Progress', owner:'Tia',    notes:'6 posts + 3 stories in calendar'},
+      {phase:'Design / Execution',status:'In Progress', owner:'Durga',  notes:'Posts in brief and design queue'},
+      {phase:'Approvals',         status:'Not Started', owner:'Tia',    notes:'First batch not yet sent'},
+      {phase:'Photoshoot',        status:'Planned',     owner:'Tia',    notes:'July 10 with Studio Kiran — brief due Jun 25'},
+      {phase:'Ads',               status:'On Track',    owner:'Pratyusha', notes:'40% used — Rs 14K of Rs 35K. Pacing well.'},
+      {phase:'Reporting',         status:'Not Started', owner:'Tia',    notes:'Due June 30'},
+    ],
+    current:'Strategy approved. Content in progress. July shoot brief due Jun 25 — send to Studio Kiran.',
+  },
+};
+
 // ── Database creation helpers ──────────────────────────────────────────────
 
 function createCalendarDB(parentId) {
@@ -653,6 +807,25 @@ function assetsBlocks(name) {
   ];
 }
 
+function clientJourneyBlocks(name, d) {
+  const jd = JOURNEY[name] || { status:'—', key:'—', phases:[], current:'—' };
+  const emoji = jd.status.startsWith('🔴') ? '🚨' : jd.status.startsWith('🟢') ? '✅' : '⚠️';
+  return [
+    co(`SMM: ${d.smm}  |  ${d.niche}  |  ${d.ig}`, '📁'),
+    co(`Status: ${jd.status}  |  Key Item: ${jd.key}`, emoji),
+    div(),
+    h2('Client Journey — June 2025'),
+    tbl(4, true, [
+      row(['Phase','Status','Owner','Notes']),
+      ...jd.phases.map(p => row([p.phase, p.status, p.owner, p.notes])),
+    ]),
+    div(),
+    h2('Current Status and Action'),
+    co(jd.current, '📌'),
+    div(),
+  ];
+}
+
 async function addInvoiceSamples(dbId) {
   await api('POST', 'pages', {
     parent: { type:'database_id', database_id: dbId },
@@ -884,13 +1057,19 @@ async function main() {
     div(),
   ]);
 
+  const clientFolderIds = {};
   for (const [name, d] of Object.entries(CAL)) {
     log(`  [${name}]`);
     const clientPg = await mkPage(hub.id, name, '📁');
-    await add(clientPg.id, [co(`SMM: ${d.smm}  |  ${d.niche}  |  ${d.ig}`, '📁'), div()]);
+    clientFolderIds[name] = clientPg.id;
 
+    // Journey overview: status callout + journey table + current action
+    await add(clientPg.id, clientJourneyBlocks(name, d));
+
+    let calPageId = null;
     if (!d.posts.length) {
       const calNote = await mkPage(clientPg.id, '📅 June 2025 — Content Calendar', '📅');
+      calPageId = calNote.id;
       await add(calNote.id, [
         co(`SMM: ${d.smm}  |  ${name}  |  June 2025`, '📅'), div(),
         co(d.note, '⏳'),
@@ -898,6 +1077,7 @@ async function main() {
       ]);
     } else {
       const calDb = await createCalendarDB(clientPg.id);
+      calPageId = calDb.id;
       for (const p of d.posts)   await addCalEntry(calDb.id, d.smm, p, false);
       for (const s of d.stories) await addCalEntry(calDb.id, d.smm, s, true);
       log(`    calendar: ${d.posts.length} posts + ${d.stories.length} stories`);
@@ -913,8 +1093,10 @@ async function main() {
     await add(assets.id, assetsBlocks(name));
 
     const clientShoots = SHOOTS.filter(s => s.brand === name);
+    let shootPgId = null;
     if (clientShoots.length) {
       const shootPg = await mkPage(clientPg.id, '📸 Shoot Briefs', '📸');
+      shootPgId = shootPg.id;
       const sb = [co(`Shoot briefs for ${name}. Filled by SMM before confirming with vendor.`, '📸'), div()];
       for (const sh of clientShoots) {
         sb.push(tog(`${sh.date}  |  ${sh.type}  |  ${sh.vendor}  |  ${sh.status}`, [
@@ -928,9 +1110,40 @@ async function main() {
       }
       await add(shootPg.id, sb);
     }
+
+    // Quick links at bottom of client page (sub-pages already created above)
+    const qlBlocks = [
+      div(),
+      h2('Quick Links'),
+      bul('Content Calendar', u(calPageId)),
+      bul('Strategy — June 2025', u(strat.id)),
+      bul('Client SOP', u(sop.id)),
+      bul('Assets and Files', u(assets.id)),
+    ];
+    if (shootPgId) qlBlocks.push(bul('Shoot Briefs', u(shootPgId)));
+    await add(clientPg.id, qlBlocks);
+
     log(`    done`);
   }
   log(`  done → ${u(hub.id)}`);
+
+  // Append client status snapshot to Founder Dashboard
+  log('  Updating Founder Dashboard with client status...');
+  const clientStatusRows = [row(['Client','SMM','Status','Key Item'])];
+  for (const [name, jd] of Object.entries(JOURNEY)) {
+    const d = CAL[name];
+    clientStatusRows.push(row([name, d ? d.smm : '—', jd.status, jd.key]));
+  }
+  await add(dash.id, [
+    div(),
+    h2('Client Status at a Glance — June 2025'),
+    co('One-line health check per client. 🔴 = action needed today  🟡 = monitor  🟢 = on track.', '📋'),
+    tbl(4, true, clientStatusRows),
+    div(),
+    h2('Client Folders — Direct Links'),
+    ...Object.entries(clientFolderIds).map(([name, id]) => bul(name, u(id))),
+  ]);
+  log(`  founder dashboard updated`);
 
   // ── STEP 3: PHOTOSHOOTS ──────────────────────────────────────────────────
   log('3/7  Photoshoots...');
@@ -1026,6 +1239,45 @@ async function main() {
     bul('Client Communication — calls, approvals, feedback loops'),
     bul('Reporting — monthly reports, performance summaries'),
     bul('Revision — reworks after client or TL feedback'),
+  ]);
+
+  // Workload Overview sub-page
+  const wfWorkload = await mkPage(wfParent.id, '📊 Team Workload Overview', '📊');
+  await add(wfWorkload.id, [
+    co('Snapshot of June 2025 task distribution. For live view, open Daily Tasks and group by Assigned To.', '📊'),
+    div(),
+    h2('June Snapshot — Task Distribution'),
+    tbl(4, true, [
+      row(['Team Member','Role','Active Tasks (June)','Focus Area']),
+      row(['Manika','Team Lead','3','TL review, client sign-offs, brand guide approval']),
+      row(['Tia','SMM','4','Aarni, Bhagat, Gujranwala, Vidhi Sheth — strategy + calendar + posting']),
+      row(['Vanshika','SMM','4','Karan Kothari, Beri, Luminique, Atul — briefs + calendar + posting']),
+      row(['Mahima','Designer','3','Bhagat posts, Karan Kothari carousel, Atul bridal carousel']),
+      row(['Durga','Designer','2','Beri Reel edit, Gujranwala post design']),
+      row(['Pratyusha','Digital Marketer','2','Luminique ads (blocked — access issue), Aarni ad pacing']),
+    ]),
+    div(),
+    h2('How to see live workload in Notion'),
+    num('Open Daily Tasks (on the Workflow Tracker page)'),
+    num('Click the ... menu top right → Group by → Assigned To'),
+    num('Filter by Status = Not Started or In Progress — shows active load only'),
+    num('This updates in real time — no separate database needed'),
+    div(),
+    h2('Design task assignment — SMM to Designer'),
+    co('How Tia and Vanshika assign design tasks to Mahima and Durga via Daily Tasks.', '🎨'),
+    bul('SMM creates a row in Daily Tasks: Task Type = Design, Assigned By = SMM name, Assigned To = designer name'),
+    bul('Add Client, Due Date, Priority, and a detailed brief or drive link in Notes'),
+    bul('Designer filters Daily Tasks: Assigned To = their name and Task Type = Design'),
+    bul('Status flow: Not Started → In Progress → Review → Done'),
+    bul('Revision needed: increment Revision Count, change Status back to In Progress with notes on what to fix'),
+    div(),
+    h2('SMM own tasks — what is tracked'),
+    bul('SMMs log all their own work in Daily Tasks — not just design handoffs'),
+    bul('SMM task types: Strategy, Brief / Script, Content Calendar, Caption Writing, Posting, Client Communication, Reporting'),
+    bul('Each SMM creates a personal view: Open Daily Tasks → Add a view → Filter: Assigned To = your name'),
+    bul('This is their individual dashboard — one saved filter, no separate database needed'),
+    bul('Manika can see all SMM tasks without filtering — or filter by Assigned By to see TL delegations'),
+    div(),
   ]);
   log(`  done → ${u(wfParent.id)}`);
 
