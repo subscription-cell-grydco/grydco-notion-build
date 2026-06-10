@@ -529,12 +529,19 @@ async function main() {
         co(`SMM: ${d.smm}  ·  ${name}  ·  June 2025  ·  Update Status in real time. Designers pick up items marked Brief Ready or Approved.`, '📅'),
         div(),
         h2('📝 Posts'),
-        ...d.posts.map(postTog),
-      ]);
-      await add(cal.id, [
+        tbl(8, true, [
+          row(['Date', 'Post Type', 'Intent', 'Hook / Objective', 'Image Copy', 'Collection', 'Brief / Reference', 'Status']),
+          ...d.posts.map(p => row([
+            p.day, p.type, p.intent, p.hook, p.copy, p.collection,
+            p.brief && p.brief !== '—' ? p.brief : '—', p.status,
+          ])),
+        ]),
         div(),
         h2('📖 Stories'),
-        ...d.stories.map(storyTog),
+        tbl(4, true, [
+          row(['Date', 'Intent', 'Content / Caption', 'Status']),
+          ...d.stories.map(s => row([s.day, s.intent, s.copy, s.status || 'Scheduled'])),
+        ]),
         div(),
         co('Once all posts and stories are approved by TL and client, mark calendar as Done for the month and archive this page.', '✅'),
       ]);
