@@ -115,7 +115,7 @@ const callout = (t, emoji) => ({
 
 // ── main ──────────────────────────────────────────────────────────────────────
 async function main() {
-  log('Starting Gryd Co. workspace reorganisation...');
+  log('Starting Gryd Co. workspace reorganisation (v2)...');
 
   // ── 1. Create 6 sections under Getting Started ───────────────────────────
   log('Creating 6 sections under Getting Started...');
