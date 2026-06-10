@@ -628,6 +628,99 @@ function addShootRow(dbId, s) {
   return api('POST', 'pages', { parent: { type:'database_id', database_id: dbId }, icon:{ type:'emoji', emoji:'📸' }, properties: props });
 }
 
+function createAdsTrackerDB(parentId) {
+  return api('POST', 'databases', {
+    parent: { type:'page_id', page_id: parentId },
+    icon: { type:'emoji', emoji:'📈' },
+    title: [{ type:'text', text:{ content:'Ads Tracker' } }],
+    properties: {
+      'Campaign':    { title: {} },
+      'Client':      { select: { options: CLIENT_OPTS } },
+      'Platform':    { select: { options: [
+        {name:'Meta',color:'blue'},{name:'Google',color:'green'},{name:'Both',color:'purple'},
+      ]}},
+      'Objective':   { select: { options: [
+        {name:'Awareness',color:'blue'},{name:'Reach',color:'green'},
+        {name:'Traffic',color:'yellow'},{name:'Engagement',color:'pink'},
+        {name:'Leads',color:'orange'},{name:'Conversions',color:'red'},{name:'Sales',color:'red'},
+      ]}},
+      'Status':      { select: { options: [
+        {name:'Draft',color:'gray'},{name:'Live',color:'green'},
+        {name:'Paused',color:'yellow'},{name:'Ended',color:'red'},
+      ]}},
+      'Month':       { select: { options: [
+        {name:'May 2025',color:'green'},{name:'June 2025',color:'blue'},{name:'July 2025',color:'purple'},
+      ]}},
+      'Budget (Rs)': { number: { format:'number' } },
+      'Spent (Rs)':  { number: { format:'number' } },
+      'ROAS':        { number: { format:'number' } },
+      'Start Date':  { date: {} },
+      'End Date':    { date: {} },
+      'Ad Link':     { url: {} },
+      'Notes':       { rich_text: {} },
+    },
+  });
+}
+
+function createMonthlyReportsDB(parentId) {
+  return api('POST', 'databases', {
+    parent: { type:'page_id', page_id: parentId },
+    icon: { type:'emoji', emoji:'📊' },
+    title: [{ type:'text', text:{ content:'Monthly Reports' } }],
+    properties: {
+      'Report':       { title: {} },
+      'Client':       { select: { options: CLIENT_OPTS } },
+      'Month':        { select: { options: [
+        {name:'May 2025',color:'green'},{name:'June 2025',color:'blue'},{name:'July 2025',color:'purple'},
+      ]}},
+      'Report Type':  { select: { options: [
+        {name:'Monthly Performance',color:'blue'},{name:'Ad Report',color:'red'},
+        {name:'Quarterly Review',color:'purple'},{name:'Campaign Report',color:'orange'},
+      ]}},
+      'Status':       { select: { options: [
+        {name:'Draft',color:'gray'},{name:'In Review',color:'yellow'},
+        {name:'Sent',color:'blue'},{name:'Approved',color:'green'},
+      ]}},
+      'SMM':          { select: { options: [
+        {name:'Tia',color:'purple'},{name:'Vanshika',color:'blue'},
+      ]}},
+      'Drive Link':   { url: {} },
+      'Key Metrics':  { rich_text: {} },
+      'Notes':        { rich_text: {} },
+    },
+  });
+}
+
+function createProjectsDB(parentId) {
+  return api('POST', 'databases', {
+    parent: { type:'page_id', page_id: parentId },
+    icon: { type:'emoji', emoji:'🎨' },
+    title: [{ type:'text', text:{ content:'Projects Tracker' } }],
+    properties: {
+      'Project':      { title: {} },
+      'Client':       { select: { options: CLIENT_OPTS } },
+      'Type':         { select: { options: [
+        {name:'Branding',color:'purple'},{name:'Website',color:'blue'},
+        {name:'App',color:'green'},{name:'Print',color:'orange'},
+      ]}},
+      'Vendor':       { select: { options: [
+        {name:'Studio Ink',color:'purple'},{name:'PixelCraft Studio',color:'blue'},
+        {name:'Internal',color:'gray'},{name:'Other',color:'gray'},
+      ]}},
+      'Status':       { select: { options: [
+        {name:'Not Started',color:'gray'},{name:'In Progress',color:'yellow'},
+        {name:'Review',color:'blue'},{name:'Blocked',color:'red'},
+        {name:'Complete',color:'green'},{name:'On Hold',color:'orange'},
+      ]}},
+      'Start Date':   { date: {} },
+      'Deadline':     { date: {} },
+      'Deliverables': { rich_text: {} },
+      'Drive Link':   { url: {} },
+      'Notes':        { rich_text: {} },
+    },
+  });
+}
+
 // ── Content blocks ─────────────────────────────────────────────────────────
 
 function strategyBlocks(name, smm) {
@@ -809,18 +902,22 @@ function assetsBlocks(name) {
 
 function clientJourneyBlocks(name, d) {
   const jd = JOURNEY[name] || { status:'—', key:'—', phases:[], current:'—' };
+  const se = {
+    'Complete':'✅ ','In Progress':'🔄 ','Pending Approval':'⏳ ','Blocked':'🚫 ',
+    'Confirmed':'📅 ','Delivered':'📦 ','Watch':'⚠️ ','Not Started':'— ',
+    'N/A':'— ','Planned':'📋 ','On Track':'🟢 ','Attention':'🟡 ','Pending':'⏳ ','Review':'👀 ',
+  };
   const emoji = jd.status.startsWith('🔴') ? '🚨' : jd.status.startsWith('🟢') ? '✅' : '⚠️';
   return [
     co(`SMM: ${d.smm}  |  ${d.niche}  |  ${d.ig}`, '📁'),
-    co(`Status: ${jd.status}  |  Key Item: ${jd.key}`, emoji),
+    co(`${jd.status}  —  ${jd.key}`, emoji),
     div(),
     h2('Client Journey — June 2025'),
-    tbl(4, true, [
-      row(['Phase','Status','Owner','Notes']),
-      ...jd.phases.map(p => row([p.phase, p.status, p.owner, p.notes])),
+    tbl(3, true, [
+      row(['Phase','Status','Owner']),
+      ...jd.phases.map(p => row([p.phase, `${se[p.status] || ''}${p.status}`, p.owner])),
     ]),
     div(),
-    h2('Current Status and Action'),
     co(jd.current, '📌'),
     div(),
   ];
@@ -958,6 +1055,109 @@ async function addWorkflowSamples(dbId) {
   }
 }
 
+async function addAdsTrackerSamples(dbId) {
+  const ads = [
+    { campaign:'Aarni — June Awareness + Reels', client:'Aarni by Sharavani', platform:'Meta',
+      objective:'Awareness', status:'Live', month:'June 2025', budget:65000, spent:27000, roas:2.4,
+      start:'2025-06-01', notes:'Awareness + reel boost. Pacing well at 42%. ROAS above benchmark.' },
+    { campaign:'Beri — June Reach Campaign', client:'Beri Jewellers', platform:'Meta',
+      objective:'Reach', status:'Live', month:'June 2025', budget:30000, spent:22000, roas:1.8,
+      start:'2025-06-01', notes:'73% spent — watch pacing. Remaining Rs 8,000 for last 2 weeks.' },
+    { campaign:'Gujranwala — Heritage June', client:'Gujranwala Jewellers', platform:'Meta',
+      objective:'Reach', status:'Live', month:'June 2025', budget:35000, spent:14000, roas:2.1,
+      start:'2025-06-01', notes:'40% used. Pacing well. Bridal targeting performing.' },
+    { campaign:'Atul — Bridal Season Campaign', client:'Atul Jewellers', platform:'Meta',
+      objective:'Sales', status:'Live', month:'June 2025', budget:50000, spent:28000, roas:2.8,
+      start:'2025-06-01', notes:'56% used. Bridal campaign live and performing. ROAS above 2.5 benchmark.' },
+    { campaign:'Luminique — New Season Luxury', client:'Luminique', platform:'Meta',
+      objective:'Conversions', status:'Live', month:'June 2025', budget:55000, spent:47000, roas:3.1,
+      start:'2025-06-01', notes:'85% spent — near limit. Flag to client. Client access issue affecting optimisation.' },
+    { campaign:'Karan Kothari — Shubh Vivah Bridal', client:'Karan Kothari Jewellers', platform:'Meta',
+      objective:'Traffic', status:'Draft', month:'June 2025', budget:25000, spent:0,
+      start:'2025-06-05', notes:'Draft created but not live. Go-live needed urgently — bridal season window closing.' },
+  ];
+  for (const a of ads) {
+    const props = {
+      'Campaign':    { title: [{ type:'text', text:{ content: a.campaign } }] },
+      'Client':      { select: { name: a.client } },
+      'Platform':    { select: { name: a.platform } },
+      'Objective':   { select: { name: a.objective } },
+      'Status':      { select: { name: a.status } },
+      'Month':       { select: { name: a.month } },
+      'Budget (Rs)': { number: a.budget },
+      'Spent (Rs)':  { number: a.spent },
+      'Notes':       { rich_text: [{ type:'text', text:{ content: a.notes } }] },
+    };
+    if (a.roas)  props['ROAS']       = { number: a.roas };
+    if (a.start) props['Start Date'] = { date: { start: a.start } };
+    const icon = a.status === 'Live' ? '🟢' : a.status === 'Draft' ? '⚪' : '🟡';
+    await api('POST', 'pages', { parent:{ type:'database_id', database_id: dbId }, icon:{ type:'emoji', emoji: icon }, properties: props });
+  }
+}
+
+async function addMonthlyReportSamples(dbId) {
+  const reports = [
+    { report:'Aarni by Sharavani — May 2025 Report', client:'Aarni by Sharavani', month:'May 2025',
+      type:'Monthly Performance', status:'Sent', smm:'Tia',
+      metrics:'Reach: 78,000  |  Engagement Rate: 4.2%  |  Followers gained: +312  |  Top post: Reel Jun 5 (8K views)',
+      notes:'Sent to client May 31. Awaiting approval.' },
+    { report:'Luminique — May 2025 Report', client:'Luminique', month:'May 2025',
+      type:'Monthly Performance', status:'Approved', smm:'Vanshika',
+      metrics:'Reach: 95,000  |  Engagement Rate: 5.1%  |  Followers gained: +480  |  Ad ROAS: 3.1',
+      notes:'Approved by client June 2. Strong month — luxury positioning working.' },
+  ];
+  for (const r of reports) {
+    const icon = r.status === 'Approved' ? '✅' : r.status === 'Sent' ? '📤' : '📝';
+    await api('POST', 'pages', {
+      parent: { type:'database_id', database_id: dbId },
+      icon:   { type:'emoji', emoji: icon },
+      properties: {
+        'Report':      { title: [{ type:'text', text:{ content: r.report } }] },
+        'Client':      { select: { name: r.client } },
+        'Month':       { select: { name: r.month } },
+        'Report Type': { select: { name: r.type } },
+        'Status':      { select: { name: r.status } },
+        'SMM':         { select: { name: r.smm } },
+        'Key Metrics': { rich_text: [{ type:'text', text:{ content: r.metrics } }] },
+        'Notes':       { rich_text: [{ type:'text', text:{ content: r.notes } }] },
+      },
+    });
+  }
+}
+
+async function addProjectSamples(dbId) {
+  await api('POST', 'pages', {
+    parent: { type:'database_id', database_id: dbId },
+    icon:   { type:'emoji', emoji:'🎨' },
+    properties: {
+      'Project':      { title: [{ type:'text', text:{ content:'Avani — Brand Identity' } }] },
+      'Client':       { select: { name:'Avani' } },
+      'Type':         { select: { name:'Branding' } },
+      'Vendor':       { select: { name:'Studio Ink' } },
+      'Status':       { select: { name:'In Progress' } },
+      'Start Date':   { date: { start:'2025-05-01' } },
+      'Deadline':     { date: { start:'2025-06-30' } },
+      'Deliverables': { rich_text: [{ type:'text', text:{ content:'Logo suite · Brand guidelines · Colour palette · Typography · Brand voice document' } }] },
+      'Notes':        { rich_text: [{ type:'text', text:{ content:'Brand guide v1 received from Studio Ink. Pending Manika review and sign-off by Jun 5. Social starts July post launch.' } }] },
+    },
+  });
+  await api('POST', 'pages', {
+    parent: { type:'database_id', database_id: dbId },
+    icon:   { type:'emoji', emoji:'🌐' },
+    properties: {
+      'Project':      { title: [{ type:'text', text:{ content:'Elmara — Website Build' } }] },
+      'Client':       { select: { name:'Elmara' } },
+      'Type':         { select: { name:'Website' } },
+      'Vendor':       { select: { name:'PixelCraft Studio' } },
+      'Status':       { select: { name:'Blocked' } },
+      'Start Date':   { date: { start:'2025-05-15' } },
+      'Deadline':     { date: { start:'2025-07-15' } },
+      'Deliverables': { rich_text: [{ type:'text', text:{ content:'Homepage · About · Collections · Contact · Blog setup' } }] },
+      'Notes':        { rich_text: [{ type:'text', text:{ content:'BLOCKED — homepage copy and hero section pending client input. Unblock before Jun 14 or go-live slips to August. Social starts August post website launch.' } }] },
+    },
+  });
+}
+
 // ── Main ───────────────────────────────────────────────────────────────────
 async function main() {
 
@@ -1029,16 +1229,6 @@ async function main() {
     bul('Avani — Brand guide v1 pending TL sign-off. Manika to review and send to client.'),
     bul('Aarni by Sharavani — June calendar pending client approval since June 2.'),
     bul('Luminique — revision: warmer tones across all posts. Vanshika in progress.'),
-    div(),
-    h2('Quick Access'),
-    bul('Workflow Tracker', u(WF)),
-    bul('Content Calendar', u(CC)),
-    bul('Client Hub', u(CH)),
-    bul('Approval Log', u(AL)),
-    bul('Revision Log', u(RL)),
-    bul('Ads Tracker', u(AT)),
-    bul('Projects Tracker', u(PT)),
-    bul('Monthly Reports', u(MR)),
   ]);
   log(`  done → ${u(dash.id)}`);
 
@@ -1396,18 +1586,176 @@ async function main() {
   ]);
   log(`  done → ${u(kpiParent.id)}`);
 
+  // ── STEP 8: MONTHLY REPORTS ──────────────────────────────────────────────
+  log('8/10  Monthly Reports...');
+  const reportsParent = await mkPage(GS, '📊 Monthly Reports', '📊');
+  const reportsDb = await createMonthlyReportsDB(reportsParent.id);
+  await addMonthlyReportSamples(reportsDb.id);
+  await add(reportsParent.id, [co('One row per client per month. 2 sample entries included. Template and June billing reference in the sub-page below.', 'ℹ️')]);
+  const reportsTemplate = await mkPage(reportsParent.id, '📋 Report Template', '📋');
+  await add(reportsTemplate.id, [
+    co('Monthly performance report template. Duplicate this for each client each month.', '📋'),
+    div(),
+    h2('Client: [Name]  |  Month: [Month Year]  |  SMM: [Name]'),
+    div(),
+    h2('Reach and Impressions'),
+    bul('Total Reach: ___  (Target: ___)  Status: [ ] Met  [ ] Below'),
+    bul('Total Impressions: ___'),
+    bul('Top reaching post: [post name + date]  |  Reach: ___'),
+    div(),
+    h2('Engagement'),
+    bul('Engagement Rate: ___%  (Target: ___%  |  Industry avg: 3-5%)'),
+    bul('Total Likes: ___  |  Comments: ___  |  Shares: ___  |  Saves: ___'),
+    bul('Top performing content type: [ ] Reel  [ ] Carousel  [ ] Post  [ ] Story'),
+    div(),
+    h2('Growth'),
+    bul('Followers start of month: ___  |  End of month: ___  |  Net change: ___'),
+    bul('Profile visits: ___  |  Bio link clicks: ___'),
+    div(),
+    h2('Ads Performance  (if applicable)'),
+    bul('Total ad spend: Rs ___  |  Budget: Rs ___  |  Remaining: Rs ___'),
+    bul('ROAS: ___  |  Reach from ads: ___  |  Link clicks: ___  |  DMs from ads: ___'),
+    bul('Best performing ad: [campaign name]  |  ROAS: ___'),
+    div(),
+    h2('Content Summary'),
+    tbl(5, true, [
+      row(['Content Type','Planned','Published','Pending','Notes']),
+      row(['Reels','—','—','—','—']),
+      row(['Carousels','—','—','—','—']),
+      row(['Static Posts','—','—','—','—']),
+      row(['Stories','—','—','—','—']),
+    ]),
+    div(),
+    h2('Key Wins This Month'),
+    bul('1. —'),
+    bul('2. —'),
+    bul('3. —'),
+    div(),
+    h2('Challenges and Learnings'),
+    bul('1. —'),
+    bul('2. —'),
+    div(),
+    h2('Plan for Next Month'),
+    bul('Focus area: —'),
+    bul('Key campaign: —'),
+    bul('Proposed budget: Rs —'),
+    div(),
+    h2('Drive Links'),
+    bul('Monthly report spreadsheet: [Paste Google Sheets link]'),
+    bul('Raw data export from Meta Insights: [Paste link]'),
+    bul('Presentation deck shared with client: [Paste link]'),
+    div(),
+  ]);
+  log(`  done → ${u(reportsParent.id)}`);
+
+  // ── STEP 9: ADS TRACKER ──────────────────────────────────────────────────
+  log('9/10  Ads Tracker...');
+  const adsParent = await mkPage(GS, '📈 Ads Tracker', '📈');
+  const adsDb = await createAdsTrackerDB(adsParent.id);
+  await addAdsTrackerSamples(adsDb.id);
+  await add(adsParent.id, [co('One row per ad campaign per client per month. Budget, spend, and ROAS tracked. Guide in sub-page below.', 'ℹ️')]);
+  const adsGuide = await mkPage(adsParent.id, '📖 Ads Guide and June Budget', '📖');
+  await add(adsGuide.id, [
+    co('Ads management reference for June 2025.', '📖'),
+    div(),
+    h2('June 2025 — Active Ad Clients'),
+    tbl(5, true, [
+      row(['Client','Platform','Budget','Spent','Status']),
+      row(['Aarni by Sharavani','Meta','Rs 65,000','Rs 27,000 (42%)','On Track']),
+      row(['Atul Jewellers','Meta','Rs 50,000','Rs 28,000 (56%)','On Track']),
+      row(['Beri Jewellers','Meta','Rs 30,000','Rs 22,000 (73%)','Watch — near limit']),
+      row(['Gujranwala Jewellers','Meta','Rs 35,000','Rs 14,000 (40%)','On Track']),
+      row(['Karan Kothari Jewellers','Meta','Rs 25,000','Rs 0','Draft — not live']),
+      row(['Luminique','Meta','Rs 55,000','Rs 47,000 (85%)','Action needed']),
+    ]),
+    div(),
+    h2('How to use'),
+    bul('Pratyusha updates Spent and ROAS weekly from Meta Ads Manager'),
+    bul('Manika reviews the tracker every Monday — flags budgets above 70%'),
+    bul('When budget hits 80%: notify Manika and client immediately'),
+    bul('Month end: update Status to Ended, add final ROAS and notes'),
+    div(),
+    h2('ROAS benchmarks'),
+    bul('Minimum acceptable: 2.0'),
+    bul('Good: 2.5 - 3.0'),
+    bul('Strong: above 3.0'),
+    bul('Luxury segment (Luminique): target 3.0+'),
+    div(),
+  ]);
+  log(`  done → ${u(adsParent.id)}`);
+
+  // ── STEP 10: PROJECTS TRACKER ────────────────────────────────────────────
+  log('10/10  Projects Tracker...');
+  const projParent = await mkPage(GS, '🎨 Projects Tracker', '🎨');
+  const projDb = await createProjectsDB(projParent.id);
+  await addProjectSamples(projDb.id);
+  await add(projParent.id, [co('Branding and website projects. Active: Avani (Studio Ink) and Elmara (PixelCraft). Project details in sub-page below.', 'ℹ️')]);
+  const projGuide = await mkPage(projParent.id, '📖 Active Projects — June 2025', '📖');
+  await add(projGuide.id, [
+    co('Current active projects outside regular SMM retainer.', '📖'),
+    div(),
+    h2('Avani — Branding Project'),
+    tbl(2, false, [
+      row(['Vendor','Studio Ink']),
+      row(['Type','Brand Identity']),
+      row(['Deliverables','Logo suite · Brand guidelines · Colour palette · Typography · Brand voice']),
+      row(['Deadline','June 30, 2025']),
+      row(['Status','In Progress — v1 received, pending Manika sign-off']),
+      row(['Social Start','July 2025 post brand launch']),
+      row(['Action needed','Manika to review brand guide v1 and send feedback by June 5']),
+    ]),
+    div(),
+    h2('Elmara — Website Project'),
+    tbl(2, false, [
+      row(['Vendor','PixelCraft Studio']),
+      row(['Type','Website Build']),
+      row(['Deliverables','Homepage · About · Collections · Contact · Blog setup']),
+      row(['Deadline','July 15, 2025']),
+      row(['Status','BLOCKED — homepage copy and hero section pending client input']),
+      row(['Social Start','August 2025 post website launch']),
+      row(['Action needed','Unblock homepage and copy before June 14 or go-live slips to August']),
+    ]),
+    div(),
+    h2('How to use this tracker'),
+    bul('Add a row when a new project begins — one row per major deliverable is fine'),
+    bul('Update Status weekly — Blocked status flags immediately to Manika'),
+    bul('Link Drive folder with all files, briefs, and vendor communication'),
+    bul('When project is complete: set Status to Complete and note delivery date in Notes'),
+    div(),
+  ]);
+  log(`  done → ${u(projParent.id)}`);
+
+  // Append Quick Access to Founder Dashboard with real page IDs
+  log('  Appending Quick Access to Founder Dashboard...');
+  await add(dash.id, [
+    div(),
+    h2('Quick Access'),
+    bul('Client Operations Hub', u(hub.id)),
+    bul('Workflow Tracker', u(wfParent.id)),
+    bul('Photoshoots', u(shootsParent.id)),
+    bul('Ads Tracker', u(adsParent.id)),
+    bul('Monthly Reports', u(reportsParent.id)),
+    bul('Projects Tracker', u(projParent.id)),
+    bul('Invoice and Payment', u(invParent.id)),
+    bul('Meeting Notes', u(meetParent.id)),
+    bul('Team KPIs', u(kpiParent.id)),
+  ]);
+
   console.log('\n══════════════════════════════════════════════════════════════');
-  console.log('   ALL DONE — 7 pages built');
+  console.log('   ALL DONE — 10 pages built');
   console.log('══════════════════════════════════════════════════════════════');
-  console.log(`\n  1. Founder Dashboard          ${u(dash.id)}`);
-  console.log(`  2. Client Operations Hub      ${u(hub.id)}`);
-  console.log(`  3. Photoshoots                ${u(shootsParent.id)}`);
-  console.log(`  4. Workflow Tracker           ${u(wfParent.id)}`);
-  console.log(`  5. Invoice and Payment        ${u(invParent.id)}`);
-  console.log(`  6. Meeting Notes              ${u(meetParent.id)}`);
-  console.log(`  7. Team KPIs                  ${u(kpiParent.id)}`);
-  console.log('\n  Move all 7 to Grydcos HQ:');
-  console.log('  Right-click each in Notion sidebar → Move to → Grydcos HQ');
+  console.log(`\n   1. Founder Dashboard          ${u(dash.id)}`);
+  console.log(`   2. Client Operations Hub      ${u(hub.id)}`);
+  console.log(`   3. Photoshoots                ${u(shootsParent.id)}`);
+  console.log(`   4. Workflow Tracker           ${u(wfParent.id)}`);
+  console.log(`   5. Invoice and Payment        ${u(invParent.id)}`);
+  console.log(`   6. Meeting Notes              ${u(meetParent.id)}`);
+  console.log(`   7. Team KPIs                  ${u(kpiParent.id)}`);
+  console.log(`   8. Monthly Reports            ${u(reportsParent.id)}`);
+  console.log(`   9. Ads Tracker                ${u(adsParent.id)}`);
+  console.log(`  10. Projects Tracker           ${u(projParent.id)}`);
+  console.log('\n  Move all 10 to Grydcos HQ:');
+  console.log('  Right-click each in Notion sidebar -> Move to -> Grydcos HQ');
 }
 
 main().catch(err => { console.error('\nError:', err.message); process.exit(1); });
