@@ -37,13 +37,19 @@ async function api(method, path, body, retries = 3) {
           });
         });
         req.on('timeout', () => { req.destroy(); reject(Object.assign(new Error('timed out'), { retry: true })); });
-        req.on('error', reject);
+        req.on('error', err => {
+          if (['ECONNABORTED','ECONNRESET','ETIMEDOUT','EPIPE','ENOTFOUND'].includes(err.code)) {
+            reject(Object.assign(err, { retry: true }));
+          } else {
+            reject(err);
+          }
+        });
         req.write(data); req.end();
       });
       await sleep(400);
       return result;
     } catch (err) {
-      if (err.retry && a < retries) await sleep((a + 1) * 2000);
+      if (err.retry && a < retries) { log(`  [retry ${a+1}] ${err.message} — waiting ${Math.pow(2,a+1)}s`); await sleep(Math.pow(2, a + 1) * 1000); }
       else throw err;
     }
   }
