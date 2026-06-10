@@ -65,9 +65,23 @@ const tog = (t, ch) => ({ type:'toggle', toggle:{ rich_text:[{type:'text',text:{
 const row = cells => ({ type:'table_row', table_row:{ cells: cells.map(c => [{type:'text',text:{content:String(c)}}]) } });
 const tbl = (w, hdr, rows) => ({ type:'table', table:{ table_width:w, has_column_header:hdr, has_row_header:false, children: rows } });
 
+function toISO(dayStr) {
+  const mo = {Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
+  const [d, m] = dayStr.split(' ');
+  return mo[m] ? `2025-${mo[m]}-${String(d).padStart(2,'0')}` : null;
+}
+
+const CLIENT_OPTS = [
+  {name:'Aarni by Sharavani',color:'purple'},{name:'Atul Jewellers',color:'blue'},
+  {name:'Bhagat Jewellers',color:'green'},{name:'Beri Jewellers',color:'orange'},
+  {name:'Gujranwala Jewellers',color:'pink'},{name:'Luminique',color:'yellow'},
+  {name:'Vidhi Sheth',color:'pink'},{name:'Karan Kothari Jewellers',color:'green'},
+  {name:'Avani',color:'red'},{name:'Elmara',color:'gray'},
+];
+
 // ── Calendar data ──────────────────────────────────────────────────────────
 const CAL = {
-  "Karan Kothari Jewellers": { smm:"Vanshika", niche:"Premium Bridal & Heritage Jewellery", ig:"@karankotharijewellers",
+  "Karan Kothari Jewellers": { smm:"Vanshika", niche:"Premium Bridal and Heritage Jewellery", ig:"@karankotharijewellers",
     posts:[
       {day:"1 Jun",type:"Reel",intent:"Product highlight",hook:"Product Desire + Visual Impact + Reach",copy:"Every bride remembers the moment the jewellery finally made her feel like a bride. Hand-carved patterns, precious stone accents. Visit the store.",collection:"Bridal Edit",brief:"https://pin.it/3tDnLibw",status:"Scheduled"},
       {day:"2 Jun",type:"Reel",intent:"Campaign launch",hook:"Festive Curiosity + Campaign Awareness + Reach",copy:"Karan Kothari Jewellers presents SHUBH VIVAH — a bridal jewellery experience crafted for the wedding moments your family will remember forever.",collection:"Shubh Vivah",brief:"https://pin.it/6U8w3xqvY",status:"In Design"},
@@ -87,7 +101,7 @@ const CAL = {
       {day:"10 Jun",intent:"Offer",copy:"Weekend special — Visit the store",status:"Scheduled"},
     ]
   },
-  "Aarni by Sharavani": { smm:"Tia", niche:"Fine Jewellery — Solitaires & Contemporary", ig:"@aarnibysharavani",
+  "Aarni by Sharavani": { smm:"Tia", niche:"Fine Jewellery — Solitaires and Contemporary", ig:"@aarnibysharavani",
     posts:[
       {day:"5 Jun",type:"Reel",intent:"Brand awareness",hook:"These are not just bangles — Curiosity + Reach",copy:"Hand-forged. Stone-set. Made to be worn for decades. The Aarni Summer Collection is here.",collection:"Summer Collection",brief:"https://drive.google.com/",status:"Posted"},
       {day:"8 Jun",type:"Post",intent:"Product",hook:"One piece. Every occasion. — Versatility + DMs",copy:"From boardroom to wedding mandap — this is the necklace that does it all. Aarni by Sharavani.",collection:"Everyday Luxury",brief:"https://drive.google.com/",status:"Scheduled"},
@@ -103,7 +117,7 @@ const CAL = {
       {day:"12 Jun",intent:"Offer",copy:"DM us to enquire about the Summer Edit",status:"Scheduled"},
     ]
   },
-  "Atul Jewellers": { smm:"Vanshika", niche:"Traditional & Bridal Jewellery", ig:"@atuljewellers",
+  "Atul Jewellers": { smm:"Vanshika", niche:"Traditional and Bridal Jewellery", ig:"@atuljewellers",
     posts:[
       {day:"2 Jun",type:"Reel",intent:"Brand",hook:"Bridal season is here. Are you ready? — Reach + DMs",copy:"The bridal collection you have been waiting for is now here. From heavy bridal sets to delicate pieces for every function.",collection:"Bridal 2025",brief:"—",status:"Posted"},
       {day:"5 Jun",type:"Post",intent:"Product",hook:"New arrivals — FOMO + DMs",copy:"Fresh arrivals this week. Over 500 designs across all budgets. Stop by and explore. Mon to Sun, 10AM to 8PM.",collection:"New Arrivals",brief:"—",status:"Scheduled"},
@@ -166,7 +180,7 @@ const CAL = {
       {day:"10 Jun",intent:"Engagement",copy:"Poll: Traditional or fusion bridal?",status:"Brief Pending"},
     ]
   },
-  "Luminique": { smm:"Vanshika", niche:"Luxury Jewellery & Lifestyle", ig:"@luminique",
+  "Luminique": { smm:"Vanshika", niche:"Luxury Jewellery and Lifestyle", ig:"@luminique",
     posts:[
       {day:"1 Jun",type:"Reel",intent:"Brand",hook:"Luxury is a feeling. This is it. — Reach",copy:"Luminique. Crafted for those who know. New season collection — now available. DM to enquire.",collection:"New Season",brief:"—",status:"Scheduled"},
       {day:"4 Jun",type:"Post",intent:"Brand story",hook:"For those who know. — Aspirational + Saves",copy:"Luminique was created for a specific kind of woman. She does not follow trends. She sets them.",collection:"Brand",brief:"—",status:"In Design"},
@@ -207,13 +221,255 @@ const CAL = {
 const SHOOTS = [
   {brand:"Aarni by Sharavani",smm:"Tia",type:"Product Shoot",vendor:"Studio Kiran",month:"June 2025",date:"15 Jun",delivery:"20 Jun",dateISO:"2025-06-15",deliveryISO:"2025-06-20",status:"Upcoming",edits:false,location:"Studio, Delhi",concepts:["Solitaire Collection","Summer Bangles","Everyday Luxury Edit"],notes:"Product-only shoot. No models. 3 collections."},
   {brand:"Bhagat Jewellers",smm:"Tia",type:"Lifestyle Shoot",vendor:"Studio Kiran",month:"May 2025",date:"20 May",delivery:"25 May",dateISO:"2025-05-20",deliveryISO:"2025-05-25",status:"Delivered",edits:true,location:"Studio",concepts:["Classic Collection"],notes:"Delivered. Assets in drive folder."},
-  {brand:"Vidhi Sheth",smm:"Tia",type:"Product Shoot",vendor:"Lens & Light",month:"June 2025",date:"22 Jun",delivery:"27 Jun",dateISO:"2025-06-22",deliveryISO:"2025-06-27",status:"Upcoming",edits:false,location:"On-site, Hauz Khas",concepts:["Contemporary Line","Daily Wear Edit"],notes:"On-site natural light shoot. Confirm location 3 days prior."},
+  {brand:"Vidhi Sheth",smm:"Tia",type:"Product Shoot",vendor:"Lens and Light",month:"June 2025",date:"22 Jun",delivery:"27 Jun",dateISO:"2025-06-22",deliveryISO:"2025-06-27",status:"Upcoming",edits:false,location:"On-site, Hauz Khas",concepts:["Contemporary Line","Daily Wear Edit"],notes:"On-site natural light shoot. Confirm location 3 days prior."},
   {brand:"Karan Kothari Jewellers",smm:"Vanshika",type:"Bridal Shoot",vendor:"Studio Kiran",month:"June 2025",date:"18 Jun",delivery:"22 Jun",dateISO:"2025-06-18",deliveryISO:"2025-06-22",status:"Upcoming",edits:false,location:"Studio, Delhi",concepts:["Bridal Edit","Plain Gold Collection","Shubh Vivah"],notes:"2 models. Heavy bridal + plain gold. 4-hour session."},
   {brand:"Atul Jewellers",smm:"Vanshika",type:"Product Shoot",vendor:"Studio Kiran",month:"June 2025",date:"1 Jun",delivery:"7 Jun",dateISO:"2025-06-01",deliveryISO:"2025-06-07",status:"Delivered",edits:true,location:"Studio",concepts:["Bridal Collection","Heritage Edit"],notes:"Delivered. Assets shared via drive."},
-  {brand:"Luminique",smm:"Vanshika",type:"Lifestyle Shoot",vendor:"Lens & Light",month:"June 2025",date:"25 Jun",delivery:"30 Jun",dateISO:"2025-06-25",deliveryISO:"2025-06-30",status:"Upcoming",edits:false,location:"Location TBD",concepts:["New Season Collection","Luxury Lifestyle"],notes:"Lifestyle shoot with model. Confirm venue by June 18."},
+  {brand:"Luminique",smm:"Vanshika",type:"Lifestyle Shoot",vendor:"Lens and Light",month:"June 2025",date:"25 Jun",delivery:"30 Jun",dateISO:"2025-06-25",deliveryISO:"2025-06-30",status:"Upcoming",edits:false,location:"Location TBD",concepts:["New Season Collection","Luxury Lifestyle"],notes:"Lifestyle shoot with model. Confirm venue by June 18."},
   {brand:"Gujranwala Jewellers",smm:"Tia",type:"Product Shoot",vendor:"Studio Kiran",month:"July 2025",date:"10 Jul",delivery:"15 Jul",dateISO:"2025-07-10",deliveryISO:"2025-07-15",status:"Planned",edits:false,location:"Studio",concepts:["Heritage Collection","Bridal Sets"],notes:"Planned for July. Brief to be sent by June 25."},
-  {brand:"Beri Jewellers",smm:"Vanshika",type:"Reel Shoot",vendor:"Lens & Light",month:"June 2025",date:"28 Jun",delivery:"2 Jul",dateISO:"2025-06-28",deliveryISO:"2025-07-02",status:"Planned",edits:false,location:"Studio",concepts:["Statement Edit","Reel Series B"],notes:"3 reels. Confirm scripts before booking vendor."},
+  {brand:"Beri Jewellers",smm:"Vanshika",type:"Reel Shoot",vendor:"Lens and Light",month:"June 2025",date:"28 Jun",delivery:"2 Jul",dateISO:"2025-06-28",deliveryISO:"2025-07-02",status:"Planned",edits:false,location:"Studio",concepts:["Statement Edit","Reel Series B"],notes:"3 reels. Confirm scripts before booking vendor."},
 ];
+
+// ── Database creation helpers ──────────────────────────────────────────────
+
+function createCalendarDB(parentId) {
+  return api('POST', 'databases', {
+    parent: { type: 'page_id', page_id: parentId },
+    icon: { type: 'emoji', emoji: '📅' },
+    title: [{ type: 'text', text: { content: 'Content Calendar — June 2025' } }],
+    properties: {
+      'Name':             { title: {} },
+      'Date':             { date: {} },
+      'Category':         { select: { options: [{name:'Post',color:'blue'},{name:'Story',color:'orange'}] } },
+      'Post Type':        { select: { options: [
+        {name:'Reel',color:'purple'},{name:'Post',color:'blue'},
+        {name:'Carousel',color:'pink'},{name:'Story',color:'orange'},
+        {name:'Ad Creative',color:'red'},
+      ]}},
+      'Intent':           { select: { options: [
+        {name:'Brand',color:'blue'},{name:'Brand awareness',color:'blue'},
+        {name:'Brand story',color:'purple'},{name:'Product',color:'green'},
+        {name:'Product highlight',color:'green'},{name:'Engagement',color:'pink'},
+        {name:'Community',color:'pink'},{name:'Styling',color:'yellow'},
+        {name:'Education',color:'yellow'},{name:'BTS',color:'gray'},
+        {name:'Craft',color:'brown'},{name:'Footfall',color:'orange'},
+        {name:'Offer',color:'orange'},{name:'Sales',color:'red'},
+        {name:'Campaign',color:'red'},{name:'Campaign launch',color:'red'},
+        {name:'Teaser',color:'purple'},
+      ]}},
+      'Hook / Objective': { rich_text: {} },
+      'Image Copy':       { rich_text: {} },
+      'Collection':       { rich_text: {} },
+      'Brief / Reference':{ url: {} },
+      'Status':           { select: { options: [
+        {name:'Brief Pending',color:'red'},{name:'In Design',color:'yellow'},
+        {name:'Approved',color:'green'},{name:'Scheduled',color:'blue'},
+        {name:'Posted',color:'gray'},{name:'In Progress',color:'orange'},
+      ]}},
+      'SMM':              { select: { options: [{name:'Tia',color:'purple'},{name:'Vanshika',color:'blue'}] } },
+    },
+  });
+}
+
+async function addCalEntry(dbId, smm, e, isStory) {
+  const name = isStory
+    ? `${e.day} — Story — ${e.intent}`
+    : `${e.day} — ${e.type} — ${e.intent}`;
+  const props = {
+    'Name':      { title: [{ type:'text', text:{ content: name } }] },
+    'Category':  { select: { name: isStory ? 'Story' : 'Post' } },
+    'Post Type': { select: { name: isStory ? 'Story' : e.type } },
+    'Status':    { select: { name: e.status } },
+    'SMM':       { select: { name: smm } },
+  };
+  const iso = toISO(e.day);
+  if (iso) props['Date'] = { date: { start: iso } };
+  if (e.intent) props['Intent'] = { select: { name: e.intent } };
+  if (!isStory) {
+    if (e.hook) props['Hook / Objective'] = { rich_text: [{ type:'text', text:{ content: e.hook } }] };
+    if (e.copy) props['Image Copy']       = { rich_text: [{ type:'text', text:{ content: e.copy } }] };
+    if (e.collection && e.collection !== '—') props['Collection'] = { rich_text: [{ type:'text', text:{ content: e.collection } }] };
+    if (e.brief && e.brief !== '—') props['Brief / Reference'] = { url: e.brief };
+  } else {
+    if (e.copy) props['Image Copy'] = { rich_text: [{ type:'text', text:{ content: e.copy } }] };
+  }
+  return api('POST', 'pages', {
+    parent: { type:'database_id', database_id: dbId },
+    icon:   { type:'emoji', emoji: isStory ? '📖' : '📸' },
+    properties: props,
+  });
+}
+
+function createWorkflowDB(parentId) {
+  return api('POST', 'databases', {
+    parent: { type: 'page_id', page_id: parentId },
+    icon: { type: 'emoji', emoji: '✅' },
+    title: [{ type: 'text', text: { content: 'Daily Tasks' } }],
+    properties: {
+      'Task Name':    { title: {} },
+      'Team Member':  { select: { options: [
+        {name:'Manika',color:'red'},{name:'Tia',color:'purple'},
+        {name:'Vanshika',color:'blue'},{name:'Mahima',color:'pink'},
+        {name:'Durga',color:'orange'},{name:'Pratyusha',color:'green'},
+      ]}},
+      'Client':       { select: { options: [...CLIENT_OPTS, {name:'Internal',color:'gray'}] } },
+      'Task Type':    { select: { options: [
+        {name:'Strategy',color:'blue'},{name:'Brief / Script',color:'purple'},
+        {name:'Content Calendar',color:'pink'},{name:'Design',color:'orange'},
+        {name:'Caption Writing',color:'yellow'},{name:'Posting',color:'green'},
+        {name:'Ads Management',color:'red'},{name:'Client Communication',color:'blue'},
+        {name:'Reporting',color:'gray'},{name:'Admin',color:'gray'},
+        {name:'Revision',color:'orange'},
+      ]}},
+      'Status':       { select: { options: [
+        {name:'Not Started',color:'gray'},{name:'In Progress',color:'yellow'},
+        {name:'Review',color:'blue'},{name:'Done',color:'green'},
+        {name:'Blocked',color:'red'},
+      ]}},
+      'Priority':     { select: { options: [
+        {name:'High',color:'red'},{name:'Medium',color:'yellow'},{name:'Low',color:'gray'},
+      ]}},
+      'Start Date':   { date: {} },
+      'Due Date':     { date: {} },
+      'Completed On': { date: {} },
+      'Notes':        { rich_text: {} },
+    },
+  });
+}
+
+function createInvoiceDB(parentId) {
+  return api('POST', 'databases', {
+    parent: { type: 'page_id', page_id: parentId },
+    icon: { type: 'emoji', emoji: '💰' },
+    title: [{ type: 'text', text: { content: 'Invoice and Payment Tracker' } }],
+    properties: {
+      'Invoice':        { title: {} },
+      'Client':         { select: { options: CLIENT_OPTS } },
+      'Month':          { select: { options: [
+        {name:'May 2025',color:'green'},{name:'June 2025',color:'blue'},
+        {name:'July 2025',color:'purple'},{name:'August 2025',color:'orange'},
+      ]}},
+      'Services':       { rich_text: {} },
+      'Amount (Rs)':    { number: { format: 'number' } },
+      'Invoice Date':   { date: {} },
+      'Due Date':       { date: {} },
+      'Payment Status': { select: { options: [
+        {name:'Draft',color:'gray'},{name:'Sent',color:'blue'},
+        {name:'Paid',color:'green'},{name:'Overdue',color:'red'},
+        {name:'Partially Paid',color:'yellow'},
+      ]}},
+      'Payment Method': { select: { options: [
+        {name:'Bank Transfer',color:'blue'},{name:'UPI',color:'green'},
+        {name:'Cheque',color:'gray'},{name:'Online',color:'purple'},
+      ]}},
+      'Notes':          { rich_text: {} },
+    },
+  });
+}
+
+function createMeetingDB(parentId) {
+  return api('POST', 'databases', {
+    parent: { type: 'page_id', page_id: parentId },
+    icon: { type: 'emoji', emoji: '📝' },
+    title: [{ type: 'text', text: { content: 'Meeting Notes' } }],
+    properties: {
+      'Meeting':        { title: {} },
+      'Client / Topic': { select: { options: [...CLIENT_OPTS, {name:'Internal',color:'gray'}] } },
+      'Date':           { date: {} },
+      'Meeting Type':   { select: { options: [
+        {name:'Client Call',color:'blue'},{name:'Internal Sync',color:'green'},
+        {name:'Strategy Session',color:'purple'},{name:'Shoot Brief',color:'orange'},
+        {name:'Review Meeting',color:'pink'},{name:'Onboarding',color:'yellow'},
+      ]}},
+      'Attendees':      { rich_text: {} },
+      'Key Points':     { rich_text: {} },
+      'Action Items':   { rich_text: {} },
+      'Follow-up Date': { date: {} },
+      'Status':         { select: { options: [
+        {name:'Notes Pending',color:'red'},{name:'Action Pending',color:'yellow'},
+        {name:'Done',color:'green'},
+      ]}},
+    },
+  });
+}
+
+function createKPIsDB(parentId) {
+  return api('POST', 'databases', {
+    parent: { type: 'page_id', page_id: parentId },
+    icon: { type: 'emoji', emoji: '📊' },
+    title: [{ type: 'text', text: { content: 'Team KPIs' } }],
+    properties: {
+      'Name':        { title: {} },
+      'Team Member': { select: { options: [
+        {name:'Tia',color:'purple'},{name:'Vanshika',color:'blue'},
+        {name:'Mahima',color:'pink'},{name:'Durga',color:'orange'},
+        {name:'Pratyusha',color:'green'},
+      ]}},
+      'Client':      { select: { options: CLIENT_OPTS } },
+      'Metric':      { select: { options: [
+        {name:'Posts Published',color:'blue'},{name:'Reels Published',color:'purple'},
+        {name:'Carousels Published',color:'pink'},{name:'Stories Published',color:'orange'},
+        {name:'Reach',color:'green'},{name:'Impressions',color:'green'},
+        {name:'Engagement Rate (%)',color:'yellow'},{name:'Followers Gained',color:'blue'},
+        {name:'Ad ROAS',color:'red'},{name:'Link Clicks',color:'orange'},
+        {name:'DMs Received',color:'purple'},
+      ]}},
+      'Month':       { select: { options: [
+        {name:'May 2025',color:'green'},{name:'June 2025',color:'blue'},{name:'July 2025',color:'purple'},
+      ]}},
+      'Target':      { number: { format: 'number' } },
+      'Actual':      { number: { format: 'number' } },
+      'Status':      { select: { options: [
+        {name:'On Track',color:'green'},{name:'Behind',color:'red'},
+        {name:'Exceeded',color:'blue'},{name:'N/A',color:'gray'},
+      ]}},
+    },
+  });
+}
+
+function createShootsDB(parentId) {
+  return api('POST', 'databases', {
+    parent: { type: 'page_id', page_id: parentId },
+    icon: { type: 'emoji', emoji: '📸' },
+    title: [{ type: 'text', text: { content: 'Photoshoots Tracker' } }],
+    properties: {
+      'Name':           { title: {} },
+      'Client':         { select: { options: CLIENT_OPTS } },
+      'Month':          { select: { options: [{name:'May 2025',color:'green'},{name:'June 2025',color:'blue'},{name:'July 2025',color:'purple'}] } },
+      'Shoot Type':     { select: { options: [{name:'Product Shoot',color:'blue'},{name:'Lifestyle Shoot',color:'green'},{name:'Bridal Shoot',color:'pink'},{name:'Reel Shoot',color:'purple'}] } },
+      'Vendor':         { select: { options: [{name:'Studio Kiran',color:'orange'},{name:'Lens and Light',color:'blue'},{name:'Other',color:'gray'}] } },
+      'Status':         { select: { options: [{name:'Planned',color:'gray'},{name:'Upcoming',color:'yellow'},{name:'Delivered',color:'green'},{name:'Cancelled',color:'red'}] } },
+      'SMM':            { select: { options: [{name:'Tia',color:'purple'},{name:'Vanshika',color:'blue'}] } },
+      'Shoot Date':     { date: {} },
+      'Delivery Date':  { date: {} },
+      'Edits Received': { checkbox: {} },
+      'Drive Link':     { url: {} },
+      'Location':       { rich_text: {} },
+      'Concepts':       { rich_text: {} },
+      'Notes':          { rich_text: {} },
+    },
+  });
+}
+
+function addShootRow(dbId, s) {
+  const props = {
+    'Name':           { title: [{ type:'text', text:{ content:`${s.brand} — ${s.type} — ${s.month}` } }] },
+    'Client':         { select: { name: s.brand } },
+    'Month':          { select: { name: s.month } },
+    'Shoot Type':     { select: { name: s.type } },
+    'Vendor':         { select: { name: s.vendor } },
+    'Status':         { select: { name: s.status } },
+    'SMM':            { select: { name: s.smm } },
+    'Edits Received': { checkbox: s.edits },
+    'Location':       { rich_text: [{ type:'text', text:{ content: s.location } }] },
+    'Concepts':       { rich_text: [{ type:'text', text:{ content: s.concepts.join(' · ') } }] },
+    'Notes':          { rich_text: [{ type:'text', text:{ content: s.notes } }] },
+  };
+  if (s.dateISO)     props['Shoot Date']    = { date: { start: s.dateISO } };
+  if (s.deliveryISO) props['Delivery Date'] = { date: { start: s.deliveryISO } };
+  return api('POST', 'pages', { parent: { type:'database_id', database_id: dbId }, icon:{ type:'emoji', emoji:'📸' }, properties: props });
+}
+
+// ── Content blocks ─────────────────────────────────────────────────────────
 
 function strategyBlocks(name, smm) {
   return [
@@ -293,6 +549,78 @@ function strategyBlocks(name, smm) {
   ];
 }
 
+function sopBlocks(name, d) {
+  return [
+    co(`Standard operating procedures for ${name}. Fill all sections before first content delivery. Updated monthly.`, '📋'),
+    div(),
+    h2('Client Overview'),
+    bul(`SMM Owner: ${d.smm}`),
+    bul(`Niche: ${d.niche}`),
+    bul(`Instagram Handle: ${d.ig}`),
+    bul('Services: —'),
+    bul('Retainer Amount: Rs —'),
+    bul('Client Since: —'),
+    div(),
+    h2('Contact Information'),
+    bul('Client Name: —'),
+    bul('Phone: —'),
+    bul('Email: —'),
+    bul('WhatsApp: —'),
+    bul('Best Time to Reach: —'),
+    bul('Preferred Mode: [ ] WhatsApp  [ ] Email  [ ] Phone'),
+    div(),
+    h2('Posting Schedule'),
+    bul('Weekly reels: —  |  Carousels: —  |  Static posts: —'),
+    bul('Story frequency: — per day'),
+    bul('Best posting times: —'),
+    bul('Blackout dates or restrictions: —'),
+    div(),
+    h2('Approval Process'),
+    bul('Who approves content: —'),
+    bul('Turnaround time expected: — hours'),
+    bul('Revision rounds included in retainer: —'),
+    bul('Approval channel: [ ] WhatsApp  [ ] Email  [ ] Notion comment'),
+    bul('If no response in 24 hours: [escalate to Manika / post as approved]'),
+    div(),
+    h2('Brand Guidelines'),
+    bul('Primary colour (hex): —'),
+    bul('Secondary colour (hex): —'),
+    bul('Fonts — primary and secondary: —'),
+    bul('Watermark: [ ] Yes  [ ] No  — placement: —'),
+    bul('Caption language: [ ] English  [ ] Hindi  [ ] Hinglish'),
+    bul('Tone of voice: —'),
+    bul('Do: —'),
+    bul('Do not: —'),
+    div(),
+    h2('Credentials and Access'),
+    bul('Instagram login: See shared credentials document'),
+    bul('Facebook Business Manager: See shared credentials document'),
+    bul('Drive folder link: [Paste link]'),
+    bul('Ad account access: [ ] Yes  [ ] No'),
+    div(),
+    h2('Monthly Retainer Scope'),
+    bul('Deliverables: — posts  — reels  — carousels  — stories'),
+    bul('Extras billed separately: [ ] Yes  [ ] No'),
+    bul('Reporting cadence: [ ] Weekly  [ ] Monthly  [ ] On demand'),
+    div(),
+    h2('Key Campaigns and Annual Events'),
+    tog('Campaign 1 — [Name]', [
+      bul('Date: —'),
+      bul('Goal: —'),
+      bul('Deliverables: —'),
+    ]),
+    tog('Campaign 2 — [Add if applicable]', [
+      bul('Date: —'),
+      bul('Goal: —'),
+      bul('Deliverables: —'),
+    ]),
+    div(),
+    h2('Notes'),
+    bul('Additional instructions, restrictions, or special agreements:'),
+    bul('—'),
+  ];
+}
+
 function assetsBlocks(name) {
   return [
     co(`File links and brand references for ${name}. Paste Drive links as you create folders. Keep updated every month.`, '🗂️'),
@@ -320,82 +648,27 @@ function assetsBlocks(name) {
   ];
 }
 
-function createShootsDB(parentId) {
-  return api('POST', 'databases', {
-    parent: { type: 'page_id', page_id: parentId },
-    icon: { type: 'emoji', emoji: '📸' },
-    title: [{ type: 'text', text: { content: 'Photoshoots Tracker' } }],
-    properties: {
-      'Name':           { title: {} },
-      'Client':         { select: { options: [
-        {name:'Aarni by Sharavani',color:'purple'},{name:'Atul Jewellers',color:'blue'},
-        {name:'Bhagat Jewellers',color:'green'},{name:'Beri Jewellers',color:'orange'},
-        {name:'Gujranwala Jewellers',color:'pink'},{name:'Luminique',color:'blue'},
-        {name:'Vidhi Sheth',color:'purple'},{name:'Karan Kothari Jewellers',color:'green'},
-        {name:'Avani',color:'red'},{name:'Elmara',color:'gray'},
-      ] } },
-      'Month':          { select: { options: [{name:'May 2025',color:'green'},{name:'June 2025',color:'blue'},{name:'July 2025',color:'purple'}] } },
-      'Shoot Type':     { select: { options: [{name:'Product Shoot',color:'blue'},{name:'Lifestyle Shoot',color:'green'},{name:'Bridal Shoot',color:'pink'},{name:'Reel Shoot',color:'purple'}] } },
-      'Vendor':         { select: { options: [{name:'Studio Kiran',color:'orange'},{name:'Lens & Light',color:'blue'},{name:'Other',color:'gray'}] } },
-      'Status':         { select: { options: [{name:'Planned',color:'gray'},{name:'Upcoming',color:'yellow'},{name:'Delivered',color:'green'},{name:'Cancelled',color:'red'}] } },
-      'SMM':            { select: { options: [{name:'Tia',color:'purple'},{name:'Vanshika',color:'blue'}] } },
-      'Shoot Date':     { date: {} },
-      'Delivery Date':  { date: {} },
-      'Edits Received': { checkbox: {} },
-      'Drive Link':     { url: {} },
-      'Location':       { rich_text: {} },
-      'Concepts':       { rich_text: {} },
-      'Notes':          { rich_text: {} },
-    },
-  });
-}
-
-function addShootRow(dbId, s) {
-  const props = {
-    'Name':           { title: [{ type:'text', text:{ content:`${s.brand} — ${s.type} — ${s.month}` } }] },
-    'Client':         { select: { name: s.brand } },
-    'Month':          { select: { name: s.month } },
-    'Shoot Type':     { select: { name: s.type } },
-    'Vendor':         { select: { name: s.vendor } },
-    'Status':         { select: { name: s.status } },
-    'SMM':            { select: { name: s.smm } },
-    'Edits Received': { checkbox: s.edits },
-    'Location':       { rich_text: [{ type:'text', text:{ content: s.location } }] },
-    'Concepts':       { rich_text: [{ type:'text', text:{ content: s.concepts.join(' · ') } }] },
-    'Notes':          { rich_text: [{ type:'text', text:{ content: s.notes } }] },
-  };
-  if (s.dateISO)     props['Shoot Date']    = { date: { start: s.dateISO } };
-  if (s.deliveryISO) props['Delivery Date'] = { date: { start: s.deliveryISO } };
-  return api('POST', 'pages', { parent: { type:'database_id', database_id: dbId }, icon:{ type:'emoji', emoji:'📸' }, properties: props });
-}
-
 // ── Main ───────────────────────────────────────────────────────────────────
 async function main() {
 
-  // ── STEP 0: CLEAN UP GETTING STARTED ──────────────────────────────────
+  // ── STEP 0: CLEAN ─────────────────────────────────────────────────────────
   log('Cleaning up Getting Started...');
-  let cursor;
-  let toArchive = [];
+  let cursor; let toArchive = [];
   do {
     const path = `blocks/${GS}/children?page_size=100${cursor ? '&start_cursor=' + cursor : ''}`;
     const res = await api('GET', path);
     toArchive = toArchive.concat((res.results || []).filter(b => b.type === 'child_page'));
     cursor = res.has_more ? res.next_cursor : undefined;
   } while (cursor);
-
   log(`  Found ${toArchive.length} pages to archive`);
   for (const pg of toArchive) {
-    try {
-      await api('PATCH', `pages/${pg.id}`, { archived: true });
-      log(`  Archived: "${pg.child_page?.title || pg.id}"`);
-    } catch (e) {
-      log(`  Skipped: ${e.message.slice(0, 60)}`);
-    }
+    try { await api('PATCH', `pages/${pg.id}`, { archived: true }); log(`  Archived: "${pg.child_page?.title || pg.id}"`); }
+    catch (e) { log(`  Skipped: ${e.message.slice(0, 60)}`); }
   }
-  log('  Getting Started is clean. Building now...\n');
+  log('  Clean. Building now...\n');
 
-  // ── 1. FOUNDER DASHBOARD ────────────────────────────────────────────────
-  log('Building Founder Dashboard...');
+  // ── STEP 1: FOUNDER DASHBOARD ────────────────────────────────────────────
+  log('1/7  Founder Dashboard...');
   const dash = await mkPage(GS, '🏠 Founder Dashboard', '🏠');
   await add(dash.id, [
     co('Central command for Gryd Co. — client health, team workload, ad performance, deadlines, and action items. Updated by Manika daily.', '🏠'),
@@ -441,7 +714,7 @@ async function main() {
     h2('Action Needed'),
     co('Review these items today and assign or escalate.', '⚠️'),
     bul('Luminique — ad budget 85% used, 2 weeks left in June. Pratyusha to review pacing.'),
-    bul('Elmara — website homepage + copy both Blocked. Unblock before June 14.'),
+    bul('Elmara — website homepage and copy both Blocked. Unblock before June 14.'),
     bul('Beri Jewellers — Reel Series round 2 pending TL review. Manika to review today.'),
     bul('Avani — Brand guide v1 pending TL sign-off. Manika to review and send to client.'),
     bul('Aarni by Sharavani — June calendar pending client approval since June 2.'),
@@ -457,65 +730,51 @@ async function main() {
     bul('Projects Tracker', u(PT)),
     bul('Monthly Reports', u(MR)),
   ]);
-  log(`  Founder Dashboard: ${u(dash.id)}`);
+  log(`  done → ${u(dash.id)}`);
 
-  // ── 2. CLIENT OPERATIONS HUB ────────────────────────────────────────────
-  log('Building Client Operations Hub...');
+  // ── STEP 2: CLIENT OPERATIONS HUB ────────────────────────────────────────
+  log('2/7  Client Operations Hub...');
   const hub = await mkPage(GS, '👥 Client Operations Hub', '👥');
   await add(hub.id, [
-    co('10 client folders — monthly calendar, strategy, assets, and shoot briefs.', '👥'),
+    co('10 client folders — content calendar database (with dropdowns and colour-coded status), strategy, SOP, assets, and shoot briefs.', '👥'),
     div(),
     h2('How to use'),
     num('SMM opens their client folder at the start of each month'),
     num('Fill Strategy first — AIDA, pillars, campaigns, lead magnets, hashtags. Get Manika sign-off.'),
-    num('Build the Content Calendar — all posts and stories for the month'),
-    num('Hand off to designers once items are marked Brief Ready or Approved'),
-    num('Update Status in real time as posts move through the pipeline'),
+    num('Add Content Calendar entries — one row per post or story. Fill all fields.'),
+    num('Hand off to designers when items reach Brief Pending or Approved'),
+    num('Update Status in real time — designers filter by Approved to pick up tasks'),
     div(),
   ]);
 
   for (const [name, d] of Object.entries(CAL)) {
-    log(`  ${name}...`);
+    log(`  [${name}]`);
     const clientPg = await mkPage(hub.id, name, '📁');
     await add(clientPg.id, [co(`SMM: ${d.smm}  |  ${d.niche}  |  ${d.ig}`, '📁'), div()]);
 
-    // Calendar
-    const cal = await mkPage(clientPg.id, '📅 June 2025 — Content Calendar', '📅');
     if (!d.posts.length) {
-      await add(cal.id, [
+      const calNote = await mkPage(clientPg.id, '📅 June 2025 — Content Calendar', '📅');
+      await add(calNote.id, [
         co(`SMM: ${d.smm}  |  ${name}  |  June 2025`, '📅'), div(),
         co(d.note, '⏳'),
-        bul('Duplicate this page and rename it for each active month once the brand goes live.'),
+        bul('Create the calendar database here when the brand goes live.'),
       ]);
     } else {
-      await add(cal.id, [
-        co(`SMM: ${d.smm}  |  ${name}  |  June 2025  |  Update Status in real time. Designers pick up Brief Ready or Approved items.`, '📅'),
-        div(),
-        h2('Posts'),
-        tbl(8, true, [
-          row(['Date','Post Type','Intent','Hook / Objective','Image Copy','Collection','Brief / Reference','Status']),
-          ...d.posts.map(p => row([p.day, p.type, p.intent, p.hook, p.copy, p.collection, p.brief !== '—' ? p.brief : '—', p.status])),
-        ]),
-        div(),
-        h2('Stories'),
-        tbl(4, true, [
-          row(['Date','Intent','Content / Caption','Status']),
-          ...d.stories.map(s => row([s.day, s.intent, s.copy, s.status || 'Scheduled'])),
-        ]),
-        div(),
-        co('Once all posts and stories are approved, mark calendar Done and archive this page.', '✅'),
-      ]);
+      const calDb = await createCalendarDB(clientPg.id);
+      for (const p of d.posts)   await addCalEntry(calDb.id, d.smm, p, false);
+      for (const s of d.stories) await addCalEntry(calDb.id, d.smm, s, true);
+      log(`    calendar: ${d.posts.length} posts + ${d.stories.length} stories`);
     }
 
-    // Strategy
     const strat = await mkPage(clientPg.id, '🎯 June 2025 — Strategy', '🎯');
     await add(strat.id, strategyBlocks(name, d.smm));
 
-    // Assets
-    const assets = await mkPage(clientPg.id, '🗂️ Assets & Files', '🗂️');
+    const sop = await mkPage(clientPg.id, '📋 Client SOP', '📋');
+    await add(sop.id, sopBlocks(name, d));
+
+    const assets = await mkPage(clientPg.id, '🗂️ Assets and Files', '🗂️');
     await add(assets.id, assetsBlocks(name));
 
-    // Shoot Brief
     const clientShoots = SHOOTS.filter(s => s.brand === name);
     if (clientShoots.length) {
       const shootPg = await mkPage(clientPg.id, '📸 Shoot Briefs', '📸');
@@ -534,13 +793,13 @@ async function main() {
     }
     log(`    done`);
   }
-  log(`  Client Hub: ${u(hub.id)}`);
+  log(`  done → ${u(hub.id)}`);
 
-  // ── 3. PHOTOSHOOTS ──────────────────────────────────────────────────────
-  log('Building Photoshoots...');
+  // ── STEP 3: PHOTOSHOOTS ──────────────────────────────────────────────────
+  log('3/7  Photoshoots...');
   const shootsParent = await mkPage(GS, '📸 Photoshoots', '📸');
   await add(shootsParent.id, [
-    co('All Gryd Co. photoshoots — past, upcoming and planned. Filter by Client, Month, Status or Vendor in the database below.', '📸'),
+    co('All Gryd Co. photoshoots — past, upcoming and planned. Filter by Client, Month, Status or Vendor in the tracker database.', '📸'),
     div(),
     h2('June 2025'),
     tbl(5, true, [
@@ -564,57 +823,182 @@ async function main() {
     ]),
     div(),
   ]);
-  const db = await createShootsDB(shootsParent.id);
-  for (const s of SHOOTS) await addShootRow(db.id, s);
-  log(`  Photoshoots: ${u(shootsParent.id)}`);
+  const shootsDb = await createShootsDB(shootsParent.id);
+  for (const s of SHOOTS) await addShootRow(shootsDb.id, s);
+  log(`  done → ${u(shootsParent.id)}`);
 
-  // ── 4. WORKFLOW GUIDE ───────────────────────────────────────────────────
-  log('Building Workflow Guide...');
-  const wf = await mkPage(GS, '📋 Workflow Tracker — How to Use', '📋');
-  await add(wf.id, [
-    co('Daily tracking source for the team. Every task logged with owner, type, status, start and completion date. Manika reviews each morning.', '📋'),
+  // ── STEP 4: WORKFLOW TRACKER ─────────────────────────────────────────────
+  log('4/7  Workflow Tracker...');
+  const wfParent = await mkPage(GS, '🔄 Workflow Tracker', '🔄');
+  await add(wfParent.id, [
+    co('Daily task tracking for the Gryd Co. team. Log every deliverable with owner, type, status, and dates. Manika reviews each morning.', '🔄'),
     div(),
-    h2('What to log'),
-    bul('Every deliverable: strategy decks, reel briefs, calendar builds, design files, ad campaigns, reports'),
-    bul('One row per task — do not combine multiple items into one entry'),
-    bul('Update Status in real time, not at the end of the day'),
+    h2('Quick rules'),
+    bul('One row per task — not per project'),
+    bul('Update Status in real time, not end of day'),
+    bul('Blocked means you cannot proceed until someone else acts — say what you need and from whom'),
+    bul('Done = 100% complete, not sent for review'),
+    bul('In Progress for more than 2 days without update: flag to Manika'),
+  ]);
+  const wfDb = await createWorkflowDB(wfParent.id);
+  log(`  Daily Tasks DB created`);
+
+  const wfGuide = await mkPage(wfParent.id, '📖 How to Fill the Tracker', '📖');
+  await add(wfGuide.id, [
+    co('Reference guide for filling in the Daily Tasks database correctly.', '📖'),
     div(),
-    h2('Properties — fill for every task'),
+    h2('Properties — what to fill'),
     tbl(3, true, [
-      row(['Property','What to fill','Why']),
-      row(['Task Name','"June reel brief — KK x4", not just "Brief"','Manika needs to know exactly what is being done']),
-      row(['Brand','The client this task is for','Tracks per-client workload']),
-      row(['Owner','One person only. Two people = two rows.','Accountability']),
-      row(['Task Type','Strategy / Brief / Design / Ads / Reporting / Approval / Revision','Tracks where time is going']),
-      row(['Status','Not Started  In Progress  Review  Done  Blocked','Live view of team progress']),
+      row(['Property','What to fill','Why it matters']),
+      row(['Task Name','Be specific: "June reel brief — KK x4" not just "Brief"','Manika needs to know exactly what is being done']),
+      row(['Team Member','One person only. Two people = two rows.','Individual accountability']),
+      row(['Client','The client this is for, or Internal','Tracks per-client workload']),
+      row(['Task Type','Select from dropdown','Shows where time is going']),
+      row(['Status','Update from Not Started to Done as task progresses','Live view for Manika']),
+      row(['Priority','High / Medium / Low — Manika sets for critical items','Helps team prioritise']),
       row(['Start Date','Fill when you pick up the task','Shows actual vs planned start']),
       row(['Due Date','Set by Manika or client deadline','Priority signal']),
       row(['Completed On','Fill when you mark Done','Shows actual task duration']),
+      row(['Notes','Blockers, dependencies, links, context','Reduces follow-up messages']),
     ]),
     div(),
-    h2('Rules'),
-    bul('Blocked: use only when you cannot proceed until someone else acts. Note what you need and from whom.'),
-    bul('In Progress for more than 2 days without update: flag to Manika.'),
-    bul('Done means 100% done — not sent for review or almost.'),
+    h2('Status definitions'),
+    bul('Not Started — assigned but not yet begun'),
+    bul('In Progress — actively being worked on'),
+    bul('Review — done by owner, waiting for TL or client feedback'),
+    bul('Done — 100% complete, all feedback addressed'),
+    bul('Blocked — cannot proceed. Note exactly what is needed and from whom.'),
     div(),
-    h2('Daily routine'),
-    bul('Morning: check tasks, update overnight status changes, resolve Blocked items'),
-    bul('During the day: update Status as you progress, log new tasks as they come in'),
-    bul('End of day: mark Done tasks with Completed On date, flag anything carrying over'),
-    div(),
-    bul('Open Workflow Tracker', u(WF)),
+    h2('Task Types'),
+    bul('Strategy — monthly strategy doc'),
+    bul('Brief / Script — reel scripts, post briefs, shoot briefs'),
+    bul('Content Calendar — building or updating the monthly calendar'),
+    bul('Design — any creative asset'),
+    bul('Caption Writing — writing and finalising captions'),
+    bul('Posting — scheduling and going live'),
+    bul('Ads Management — setup, monitoring, optimisation'),
+    bul('Client Communication — calls, approvals, feedback loops'),
+    bul('Reporting — monthly reports, performance summaries'),
+    bul('Revision — reworks after client or TL feedback'),
   ]);
-  log(`  Workflow Guide: ${u(wf.id)}`);
+  log(`  done → ${u(wfParent.id)}`);
+
+  // ── STEP 5: INVOICE AND PAYMENT TRACKER ──────────────────────────────────
+  log('5/7  Invoice and Payment Tracker...');
+  const invParent = await mkPage(GS, '💰 Invoice and Payment Tracker', '💰');
+  await add(invParent.id, [
+    co('All client invoices and payment status for Gryd Co. Maintained by Manika. One row per invoice raised.', '💰'),
+    div(),
+    h2('How to use'),
+    bul('Raise a new invoice entry at the start of each month per client'),
+    bul('Update Payment Status as soon as payment is received'),
+    bul('Filter by Client or Month to check outstanding amounts'),
+    bul('Overdue = past Due Date and still unpaid — flag immediately to Manika'),
+    div(),
+    h2('June 2025 — Billing Overview'),
+    tbl(4, true, [
+      row(['Client','Services','Amount (Rs)','Status']),
+      row(['Aarni by Sharavani','SMM + Ads','65,000','—']),
+      row(['Atul Jewellers','SMM + Ads + Branding','50,000','—']),
+      row(['Bhagat Jewellers','SMM only','—','—']),
+      row(['Beri Jewellers','SMM + Ads','30,000','—']),
+      row(['Gujranwala Jewellers','SMM + Ads','35,000','—']),
+      row(['Luminique','SMM + Ads + Branding','55,000','—']),
+      row(['Vidhi Sheth','SMM only','—','—']),
+      row(['Karan Kothari Jewellers','SMM + Ads','25,000','—']),
+      row(['Avani','Branding Project','—','—']),
+      row(['Elmara','Website Project','—','—']),
+    ]),
+    div(),
+  ]);
+  await createInvoiceDB(invParent.id);
+  log(`  done → ${u(invParent.id)}`);
+
+  // ── STEP 6: MEETING NOTES ────────────────────────────────────────────────
+  log('6/7  Meeting Notes...');
+  const meetParent = await mkPage(GS, '📝 Meeting Notes', '📝');
+  await add(meetParent.id, [
+    co('All client calls, internal syncs, and strategy sessions. One row per meeting. Fill action items before closing.', '📝'),
+    div(),
+    h2('How to use'),
+    bul('Add a row right after every call or meeting — do not wait until end of day'),
+    bul('Fill Action Items before you close the entry'),
+    bul('Set Follow-up Date whenever something is pending'),
+    bul('Status: Action Pending until all items are resolved, then Done'),
+    div(),
+    h2('Meeting types'),
+    bul('Client Call — check-ins, feedback, approvals'),
+    bul('Internal Sync — team standup, weekly review'),
+    bul('Strategy Session — monthly client strategy planning'),
+    bul('Shoot Brief — pre-shoot briefing with vendor or client'),
+    bul('Review Meeting — campaign or monthly performance review'),
+    bul('Onboarding — new client kickoff'),
+    div(),
+  ]);
+  await createMeetingDB(meetParent.id);
+  log(`  done → ${u(meetParent.id)}`);
+
+  // ── STEP 7: TEAM KPIs ────────────────────────────────────────────────────
+  log('7/7  Team KPIs...');
+  const kpiParent = await mkPage(GS, '📊 Team KPIs', '📊');
+  await add(kpiParent.id, [
+    co('Monthly performance targets and actuals for the Gryd Co. team. Targets set by Manika at month start. Reviewed in monthly sync.', '📊'),
+    div(),
+    h2('How to use'),
+    bul('Manika sets Target for each metric at the start of the month'),
+    bul('Team members update Actual at month end from Meta Insights and Ads Manager'),
+    bul('Filter by Team Member, Client, or Month for performance reviews'),
+    bul('Status: On Track / Behind / Exceeded — update after Actual is filled'),
+    div(),
+    h2('Metrics tracked'),
+    tbl(2, true, [
+      row(['Metric','Source']),
+      row(['Posts Published','Count of live posts on Instagram']),
+      row(['Reels Published','Count of live reels']),
+      row(['Carousels Published','Count of live carousels']),
+      row(['Stories Published','Count of stories posted']),
+      row(['Reach','Meta Insights — unique accounts reached']),
+      row(['Impressions','Meta Insights — total impressions']),
+      row(['Engagement Rate (%)','(Likes + Comments + Saves) / Reach x 100']),
+      row(['Followers Gained','Net new followers — Meta Insights']),
+      row(['Ad ROAS','Meta Ads Manager — Return on Ad Spend']),
+      row(['Link Clicks','Bio link + story swipe-up clicks']),
+      row(['DMs Received','Inbound DMs from content or ads']),
+    ]),
+    div(),
+    h2('June 2025 Targets — Starter Overview'),
+    tbl(5, true, [
+      row(['Team Member','Client','Metric','Target','Notes']),
+      row(['Tia','Aarni by Sharavani','Posts Published','6','4 posts + 2 reels min']),
+      row(['Tia','Aarni by Sharavani','Reach','90,000','—']),
+      row(['Tia','Bhagat Jewellers','Posts Published','6','—']),
+      row(['Tia','Gujranwala Jewellers','Posts Published','6','—']),
+      row(['Tia','Vidhi Sheth','Posts Published','6','—']),
+      row(['Vanshika','Atul Jewellers','Posts Published','6','—']),
+      row(['Vanshika','Beri Jewellers','Posts Published','6','—']),
+      row(['Vanshika','Luminique','Posts Published','6','Luxury positioning push']),
+      row(['Vanshika','Luminique','Reach','100,000','—']),
+      row(['Vanshika','Karan Kothari Jewellers','Posts Published','9','Per calendar']),
+      row(['Pratyusha','Aarni by Sharavani','Ad ROAS','2.5','Min benchmark']),
+      row(['Pratyusha','Luminique','Ad ROAS','3.0','Luxury ROAS target']),
+    ]),
+    div(),
+  ]);
+  await createKPIsDB(kpiParent.id);
+  log(`  done → ${u(kpiParent.id)}`);
 
   console.log('\n══════════════════════════════════════════════════════════════');
-  console.log('   ALL DONE');
+  console.log('   ALL DONE — 7 pages built');
   console.log('══════════════════════════════════════════════════════════════');
-  console.log(`\n  Founder Dashboard     ${u(dash.id)}`);
-  console.log(`  Client Operations Hub ${u(hub.id)}`);
-  console.log(`  Photoshoots           ${u(shootsParent.id)}`);
-  console.log(`  Workflow Guide        ${u(wf.id)}`);
-  console.log('\n  Now go to Notion and move these 4 pages to Grydcos HQ.');
-  console.log('  Right-click each page in sidebar → Move to → Grydcos HQ');
+  console.log(`\n  1. Founder Dashboard          ${u(dash.id)}`);
+  console.log(`  2. Client Operations Hub      ${u(hub.id)}`);
+  console.log(`  3. Photoshoots                ${u(shootsParent.id)}`);
+  console.log(`  4. Workflow Tracker           ${u(wfParent.id)}`);
+  console.log(`  5. Invoice and Payment        ${u(invParent.id)}`);
+  console.log(`  6. Meeting Notes              ${u(meetParent.id)}`);
+  console.log(`  7. Team KPIs                  ${u(kpiParent.id)}`);
+  console.log('\n  Move all 7 to Grydcos HQ:');
+  console.log('  Right-click each in Notion sidebar → Move to → Grydcos HQ');
 }
 
 main().catch(err => { console.error('\nError:', err.message); process.exit(1); });
