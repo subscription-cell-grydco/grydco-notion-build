@@ -128,10 +128,12 @@ const callout = (t, emoji) => ({
 async function main() {
   log('Starting Gryd Co. workspace reorganisation...');
 
-  // ── 1. Verify teamspace access via Projects page ─────────────────────────
+  // ── 1. Verify teamspace access (Projects is a database, check accordingly) ─
   log('Verifying access to Grydco\'s HQ teamspace...');
   try {
-    await api('GET', `pages/${PROJECTS_PAGE_ID}`);
+    // Projects is a database — try databases endpoint first, then pages
+    try { await api('GET', `databases/${PROJECTS_PAGE_ID}`); }
+    catch { await api('GET', `pages/${PROJECTS_PAGE_ID}`); }
     log('✅ Teamspace access confirmed');
   } catch (err) {
     console.error('\n❌ Cannot access Grydco\'s HQ teamspace.');
