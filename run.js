@@ -305,14 +305,17 @@ function createWorkflowDB(parentId) {
     icon: { type: 'emoji', emoji: '✅' },
     title: [{ type: 'text', text: { content: 'Daily Tasks' } }],
     properties: {
-      'Task Name':    { title: {} },
-      'Team Member':  { select: { options: [
+      'Task Name':         { title: {} },
+      'Assigned To':       { select: { options: [
         {name:'Manika',color:'red'},{name:'Tia',color:'purple'},
         {name:'Vanshika',color:'blue'},{name:'Mahima',color:'pink'},
         {name:'Durga',color:'orange'},{name:'Pratyusha',color:'green'},
       ]}},
-      'Client':       { select: { options: [...CLIENT_OPTS, {name:'Internal',color:'gray'}] } },
-      'Task Type':    { select: { options: [
+      'Assigned By':       { select: { options: [
+        {name:'Manika',color:'red'},{name:'Tia',color:'purple'},{name:'Vanshika',color:'blue'},
+      ]}},
+      'Client':            { select: { options: [...CLIENT_OPTS, {name:'Internal',color:'gray'}] } },
+      'Task Type':         { select: { options: [
         {name:'Strategy',color:'blue'},{name:'Brief / Script',color:'purple'},
         {name:'Content Calendar',color:'pink'},{name:'Design',color:'orange'},
         {name:'Caption Writing',color:'yellow'},{name:'Posting',color:'green'},
@@ -320,18 +323,20 @@ function createWorkflowDB(parentId) {
         {name:'Reporting',color:'gray'},{name:'Admin',color:'gray'},
         {name:'Revision',color:'orange'},
       ]}},
-      'Status':       { select: { options: [
+      'Status':            { select: { options: [
         {name:'Not Started',color:'gray'},{name:'In Progress',color:'yellow'},
         {name:'Review',color:'blue'},{name:'Done',color:'green'},
         {name:'Blocked',color:'red'},
       ]}},
-      'Priority':     { select: { options: [
+      'Priority':          { select: { options: [
         {name:'High',color:'red'},{name:'Medium',color:'yellow'},{name:'Low',color:'gray'},
       ]}},
-      'Start Date':   { date: {} },
-      'Due Date':     { date: {} },
-      'Completed On': { date: {} },
-      'Notes':        { rich_text: {} },
+      'Revision Count':    { number: { format: 'number' } },
+      'Start Date':        { date: {} },
+      'Due Date':          { date: {} },
+      'Completed On':      { date: {} },
+      'Turnaround (days)': { formula: { expression: 'dateBetween(prop("Completed On"), prop("Start Date"), "days")' } },
+      'Notes':             { rich_text: {} },
     },
   });
 }
@@ -648,6 +653,59 @@ function assetsBlocks(name) {
   ];
 }
 
+async function addInvoiceSamples(dbId) {
+  await api('POST', 'pages', {
+    parent: { type:'database_id', database_id: dbId },
+    icon: { type:'emoji', emoji:'✅' },
+    properties: {
+      'Invoice':        { title: [{ type:'text', text:{ content:'GC-MAY-001 — Luminique' } }] },
+      'Client':         { select: { name:'Luminique' } },
+      'Month':          { select: { name:'May 2025' } },
+      'Services':       { rich_text: [{ type:'text', text:{ content:'SMM + Ads + Branding' } }] },
+      'Amount (Rs)':    { number: 55000 },
+      'Invoice Date':   { date: { start:'2025-05-01' } },
+      'Due Date':       { date: { start:'2025-05-10' } },
+      'Payment Status': { select: { name:'Paid' } },
+      'Payment Method': { select: { name:'Bank Transfer' } },
+      'Notes':          { rich_text: [{ type:'text', text:{ content:'Received May 8. NEFT ref: GRD/0508. Replace with actual invoice ref.' } }] },
+    },
+  });
+  await api('POST', 'pages', {
+    parent: { type:'database_id', database_id: dbId },
+    icon: { type:'emoji', emoji:'📤' },
+    properties: {
+      'Invoice':        { title: [{ type:'text', text:{ content:'GC-JUN-001 — Aarni by Sharavani' } }] },
+      'Client':         { select: { name:'Aarni by Sharavani' } },
+      'Month':          { select: { name:'June 2025' } },
+      'Services':       { rich_text: [{ type:'text', text:{ content:'SMM + Meta Ads' } }] },
+      'Amount (Rs)':    { number: 65000 },
+      'Invoice Date':   { date: { start:'2025-06-01' } },
+      'Due Date':       { date: { start:'2025-06-10' } },
+      'Payment Status': { select: { name:'Sent' } },
+      'Payment Method': { select: { name:'Bank Transfer' } },
+      'Notes':          { rich_text: [{ type:'text', text:{ content:'Invoice sent via email June 1. Follow up by June 8 if not confirmed.' } }] },
+    },
+  });
+}
+
+async function addMeetingSample(dbId) {
+  await api('POST', 'pages', {
+    parent: { type:'database_id', database_id: dbId },
+    icon: { type:'emoji', emoji:'📞' },
+    properties: {
+      'Meeting':        { title: [{ type:'text', text:{ content:'Jun 3 — Aarni by Sharavani — Monthly Review' } }] },
+      'Client / Topic': { select: { name:'Aarni by Sharavani' } },
+      'Date':           { date: { start:'2025-06-03' } },
+      'Meeting Type':   { select: { name:'Client Call' } },
+      'Attendees':      { rich_text: [{ type:'text', text:{ content:'Tia, Sharavani (client)' } }] },
+      'Key Points':     { rich_text: [{ type:'text', text:{ content:'June calendar approved. Client wants more lifestyle reels over product close-ups. Product shoot confirmed June 15 with Studio Kiran.' } }] },
+      'Action Items':   { rich_text: [{ type:'text', text:{ content:'1. Tia to update 2 reel briefs to lifestyle angle by June 5.  2. Confirm Studio Kiran booking for June 15.' } }] },
+      'Follow-up Date': { date: { start:'2025-06-07' } },
+      'Status':         { select: { name:'Action Pending' } },
+    },
+  });
+}
+
 // ── Main ───────────────────────────────────────────────────────────────────
 async function main() {
 
@@ -798,8 +856,15 @@ async function main() {
   // ── STEP 3: PHOTOSHOOTS ──────────────────────────────────────────────────
   log('3/7  Photoshoots...');
   const shootsParent = await mkPage(GS, '📸 Photoshoots', '📸');
-  await add(shootsParent.id, [
-    co('All Gryd Co. photoshoots — past, upcoming and planned. Filter by Client, Month, Status or Vendor in the tracker database.', '📸'),
+  // DB first — appears as first content block
+  const shootsDb = await createShootsDB(shootsParent.id);
+  for (const s of SHOOTS) await addShootRow(shootsDb.id, s);
+  // Brief note after the database
+  await add(shootsParent.id, [co('Filter by Client, Month, Status or Vendor. Monthly summary is in the sub-page below.', 'ℹ️')]);
+  // Monthly summary goes in a sub-page
+  const shootsSummary = await mkPage(shootsParent.id, '📋 Monthly Summary', '📋');
+  await add(shootsSummary.id, [
+    co('Quick-reference shoot summary by month.', '📋'),
     div(),
     h2('June 2025'),
     tbl(5, true, [
@@ -823,42 +888,37 @@ async function main() {
     ]),
     div(),
   ]);
-  const shootsDb = await createShootsDB(shootsParent.id);
-  for (const s of SHOOTS) await addShootRow(shootsDb.id, s);
   log(`  done → ${u(shootsParent.id)}`);
 
   // ── STEP 4: WORKFLOW TRACKER ─────────────────────────────────────────────
   log('4/7  Workflow Tracker...');
   const wfParent = await mkPage(GS, '🔄 Workflow Tracker', '🔄');
-  await add(wfParent.id, [
-    co('Daily task tracking for the Gryd Co. team. Log every deliverable with owner, type, status, and dates. Manika reviews each morning.', '🔄'),
-    div(),
-    h2('Quick rules'),
-    bul('One row per task — not per project'),
-    bul('Update Status in real time, not end of day'),
-    bul('Blocked means you cannot proceed until someone else acts — say what you need and from whom'),
-    bul('Done = 100% complete, not sent for review'),
-    bul('In Progress for more than 2 days without update: flag to Manika'),
-  ]);
+  // DB first — the main content
   const wfDb = await createWorkflowDB(wfParent.id);
-  log(`  Daily Tasks DB created`);
-
+  // Brief note below DB
+  await add(wfParent.id, [
+    co('Assign tasks via Assigned By + Assigned To. Turnaround days auto-calculate when Completed On is filled. Guide is in the sub-page below.', 'ℹ️'),
+  ]);
+  // Guide as sub-page
   const wfGuide = await mkPage(wfParent.id, '📖 How to Fill the Tracker', '📖');
   await add(wfGuide.id, [
-    co('Reference guide for filling in the Daily Tasks database correctly.', '📖'),
+    co('Reference guide for the Daily Tasks database.', '📖'),
     div(),
     h2('Properties — what to fill'),
     tbl(3, true, [
       row(['Property','What to fill','Why it matters']),
       row(['Task Name','Be specific: "June reel brief — KK x4" not just "Brief"','Manika needs to know exactly what is being done']),
-      row(['Team Member','One person only. Two people = two rows.','Individual accountability']),
-      row(['Client','The client this is for, or Internal','Tracks per-client workload']),
+      row(['Assigned To','One person only. Two people = two rows.','Individual accountability']),
+      row(['Assigned By','Who created or delegated this task','Tracks TL to SMM to Designer chain']),
+      row(['Client','The client or Internal','Tracks per-client workload']),
       row(['Task Type','Select from dropdown','Shows where time is going']),
       row(['Status','Update from Not Started to Done as task progresses','Live view for Manika']),
       row(['Priority','High / Medium / Low — Manika sets for critical items','Helps team prioritise']),
+      row(['Revision Count','Increment each time task is sent back for rework','Flags recurring revision problems']),
       row(['Start Date','Fill when you pick up the task','Shows actual vs planned start']),
       row(['Due Date','Set by Manika or client deadline','Priority signal']),
-      row(['Completed On','Fill when you mark Done','Shows actual task duration']),
+      row(['Completed On','Fill when you mark Done','Turnaround auto-calculates']),
+      row(['Turnaround (days)','Auto-calculated — do not fill','Days from Start to Completed On']),
       row(['Notes','Blockers, dependencies, links, context','Reduces follow-up messages']),
     ]),
     div(),
@@ -868,6 +928,11 @@ async function main() {
     bul('Review — done by owner, waiting for TL or client feedback'),
     bul('Done — 100% complete, all feedback addressed'),
     bul('Blocked — cannot proceed. Note exactly what is needed and from whom.'),
+    div(),
+    h2('Individual dashboards'),
+    bul('Each team member can create their own filtered view of Daily Tasks:'),
+    bul('Open Daily Tasks → click + (Add a view) → Filter: Assigned To = your name'),
+    bul('This gives a personal task list that updates in real time — no separate database needed'),
     div(),
     h2('Task Types'),
     bul('Strategy — monthly strategy doc'),
@@ -886,39 +951,48 @@ async function main() {
   // ── STEP 5: INVOICE AND PAYMENT TRACKER ──────────────────────────────────
   log('5/7  Invoice and Payment Tracker...');
   const invParent = await mkPage(GS, '💰 Invoice and Payment Tracker', '💰');
-  await add(invParent.id, [
-    co('All client invoices and payment status for Gryd Co. Maintained by Manika. One row per invoice raised.', '💰'),
+  // DB first, then 2 sample entries, then guide sub-page
+  const invDb = await createInvoiceDB(invParent.id);
+  await addInvoiceSamples(invDb.id);
+  await add(invParent.id, [co('One row per invoice. Sample entries included — replace with real data. Guide is in the sub-page below.', 'ℹ️')]);
+  const invGuide = await mkPage(invParent.id, '📖 Guide and June Billing Overview', '📖');
+  await add(invGuide.id, [
+    co('How to use the Invoice tracker and June 2025 billing reference.', '📖'),
     div(),
     h2('How to use'),
-    bul('Raise a new invoice entry at the start of each month per client'),
+    bul('Raise a new entry at the start of each month per client'),
     bul('Update Payment Status as soon as payment is received'),
     bul('Filter by Client or Month to check outstanding amounts'),
     bul('Overdue = past Due Date and still unpaid — flag immediately to Manika'),
     div(),
-    h2('June 2025 — Billing Overview'),
+    h2('June 2025 — Billing Reference'),
     tbl(4, true, [
-      row(['Client','Services','Amount (Rs)','Status']),
+      row(['Client','Services','Amount (Rs)','Note']),
       row(['Aarni by Sharavani','SMM + Ads','65,000','—']),
       row(['Atul Jewellers','SMM + Ads + Branding','50,000','—']),
-      row(['Bhagat Jewellers','SMM only','—','—']),
+      row(['Bhagat Jewellers','SMM only','—','Confirm retainer amount']),
       row(['Beri Jewellers','SMM + Ads','30,000','—']),
       row(['Gujranwala Jewellers','SMM + Ads','35,000','—']),
       row(['Luminique','SMM + Ads + Branding','55,000','—']),
-      row(['Vidhi Sheth','SMM only','—','—']),
+      row(['Vidhi Sheth','SMM only','—','Confirm retainer amount']),
       row(['Karan Kothari Jewellers','SMM + Ads','25,000','—']),
-      row(['Avani','Branding Project','—','—']),
-      row(['Elmara','Website Project','—','—']),
+      row(['Avani','Branding Project','—','Project fee TBD']),
+      row(['Elmara','Website Project','—','Project fee TBD']),
     ]),
     div(),
   ]);
-  await createInvoiceDB(invParent.id);
   log(`  done → ${u(invParent.id)}`);
 
   // ── STEP 6: MEETING NOTES ────────────────────────────────────────────────
   log('6/7  Meeting Notes...');
   const meetParent = await mkPage(GS, '📝 Meeting Notes', '📝');
-  await add(meetParent.id, [
-    co('All client calls, internal syncs, and strategy sessions. One row per meeting. Fill action items before closing.', '📝'),
+  // DB first, then sample entry, then guide sub-page
+  const meetDb = await createMeetingDB(meetParent.id);
+  await addMeetingSample(meetDb.id);
+  await add(meetParent.id, [co('One row per meeting. Sample entry included. Guide is in the sub-page below.', 'ℹ️')]);
+  const meetGuide = await mkPage(meetParent.id, '📖 Guide', '📖');
+  await add(meetGuide.id, [
+    co('How to use the Meeting Notes database.', '📖'),
     div(),
     h2('How to use'),
     bul('Add a row right after every call or meeting — do not wait until end of day'),
@@ -935,14 +1009,17 @@ async function main() {
     bul('Onboarding — new client kickoff'),
     div(),
   ]);
-  await createMeetingDB(meetParent.id);
   log(`  done → ${u(meetParent.id)}`);
 
   // ── STEP 7: TEAM KPIs ────────────────────────────────────────────────────
   log('7/7  Team KPIs...');
   const kpiParent = await mkPage(GS, '📊 Team KPIs', '📊');
-  await add(kpiParent.id, [
-    co('Monthly performance targets and actuals for the Gryd Co. team. Targets set by Manika at month start. Reviewed in monthly sync.', '📊'),
+  // DB first, then guide sub-page with metrics reference and starter targets
+  await createKPIsDB(kpiParent.id);
+  await add(kpiParent.id, [co('Add one row per metric per team member per month. Metrics guide and June starter targets are in the sub-page below.', 'ℹ️')]);
+  const kpiGuide = await mkPage(kpiParent.id, '📖 Metrics Guide and June Targets', '📖');
+  await add(kpiGuide.id, [
+    co('How to use Team KPIs and June 2025 starter targets.', '📖'),
     div(),
     h2('How to use'),
     bul('Manika sets Target for each metric at the start of the month'),
@@ -950,7 +1027,7 @@ async function main() {
     bul('Filter by Team Member, Client, or Month for performance reviews'),
     bul('Status: On Track / Behind / Exceeded — update after Actual is filled'),
     div(),
-    h2('Metrics tracked'),
+    h2('Metrics and sources'),
     tbl(2, true, [
       row(['Metric','Source']),
       row(['Posts Published','Count of live posts on Instagram']),
@@ -966,7 +1043,7 @@ async function main() {
       row(['DMs Received','Inbound DMs from content or ads']),
     ]),
     div(),
-    h2('June 2025 Targets — Starter Overview'),
+    h2('June 2025 Targets — Starter'),
     tbl(5, true, [
       row(['Team Member','Client','Metric','Target','Notes']),
       row(['Tia','Aarni by Sharavani','Posts Published','6','4 posts + 2 reels min']),
@@ -984,7 +1061,6 @@ async function main() {
     ]),
     div(),
   ]);
-  await createKPIsDB(kpiParent.id);
   log(`  done → ${u(kpiParent.id)}`);
 
   console.log('\n══════════════════════════════════════════════════════════════');
