@@ -1,7 +1,9 @@
 const https = require('https');
 
 const TOKEN  = process.env.NOTION_TOKEN;
-const HQ_ID  = process.env.NOTION_HQ_ID; // set this to Grydco's HQ page ID
+
+// "Getting Started" is the root page of the Grydco's HQ teamspace
+const HQ_ID  = process.env.NOTION_HQ_ID || '37b6b847-91e8-8025-99c1-f6185bd0fda7';
 
 if (!TOKEN) { console.error('Set NOTION_TOKEN first: set NOTION_TOKEN=ntn_xxx'); process.exit(1); }
 
@@ -105,29 +107,9 @@ const callout = (t, emoji) => ({
 async function main() {
   log('Starting Gryd Co. workspace reorganisation...');
 
-  // ── 1. Find Grydco's HQ ──────────────────────────────────────────────────
-  let hqId = HQ_ID;
-  if (!hqId) {
-    log("Searching for Grydco's HQ...");
-    const res = await api('POST', 'search', { page_size: 20 });
-    const hq = res.results.find(r => {
-      const t = r.properties?.title?.title?.[0]?.plain_text || r.title?.[0]?.plain_text || '';
-      return /grydco.{0,10}hq|hq.{0,10}grydco/i.test(t);
-    });
-    hqId = hq?.id;
-  }
-
-  if (!hqId) {
-    console.error('\n❌  Could not find Grydco\'s HQ.');
-    console.error('Please:');
-    console.error('  1. In Notion, click "Grydco\'s HQ" in the left sidebar');
-    console.error('  2. Click ... → Connections → enable Gryd Co. Build integration');
-    console.error('  3. Copy the page ID from the URL and run:');
-    console.error('       set NOTION_HQ_ID=<page-id>');
-    console.error('       node reorganize.js');
-    process.exit(1);
-  }
-  log(`✅ Found Grydco's HQ: ${hqId}`);
+  // ── 1. Use Getting Started page (root of Grydco's HQ teamspace) ─────────
+  const hqId = HQ_ID;
+  log(`✅ Using Grydco's HQ root: ${hqId}`);
 
   // ── 2. Move existing container pages into Grydco's HQ ───────────────────
   log("Moving Clients, Operations, Reporting → Grydco's HQ...");
