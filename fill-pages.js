@@ -7,6 +7,7 @@ const IDS = {
   gettingStarted:  '37b6b847-91e8-8025-99c1-f6185bd0fda7',
   clients:         '37b6b847-91e8-8147-8dc5-d0f7dc381fda',
   operations:      '37b6b847-91e8-8126-9421-eb0ebd647e1e',
+  reporting:       '37b6b847-91e8-811b-95b1-d8892d1f1b40',
   clientHub:       '37b6b847-91e8-8115-9892-d139d7fa0428',
   workflowTracker: '37b6b847-91e8-81c1-bed2-d9f3afad6390',
   contentCalendar: '37b6b847-91e8-81cc-ae0d-ebecf7d139fc',
@@ -136,31 +137,28 @@ async function main() {
   ]);
   log(`  ✅ Founder Dashboard → ${u(dash.id)}`);
 
-  // ── 2. PERFORMANCE MARKETING (top-level section) ──────────────────────────
-  log('Building Performance Marketing section...');
-  const perf = await mkPage(IDS.gettingStarted, '📢 Performance Marketing', '📢');
-  await addBlocks(perf.id, [
-    callout('Track all paid campaigns across Meta and Google. Monitor budgets, spend and performance in one place.', '📢'),
+  // ── 2. REPORTING PAGE — add Ads + Reports content ────────────────────────
+  log('Filling Reporting page (Performance Marketing + Monthly Reports)...');
+  await addBlocks(IDS.reporting, [
+    callout('Combined view of all performance marketing and monthly client reports for Gryd Co.', '📊'),
     div(),
-    h2('📣 Ads Tracker'),
-    bul('→ Open Ads Tracker', u(IDS.adsTracker)),
-    p(''),
-    callout('Tip: Drag the Ads Tracker database from Operations into this page using the Notion sidebar.', '💡'),
+    h2('📣 Performance Marketing'),
+    h3('Active Ad Campaigns'),
+    bul('Aarni — Awareness June 2026  ·  Meta Video  ·  ₹25,000  ·  Live'),
+    bul('Beri — Conversion Campaign Q2  ·  Meta Carousel  ·  ₹40,000  ·  Live'),
+    bul('Gujranwala — Bridal Season Ads  ·  Meta Static  ·  ₹30,000  ·  Paused'),
+    h3('Clients on Ads'),
+    bul('Aarni by Sharavani  ·  Atul Jewellers  ·  Beri Jewellers'),
+    bul('Gujranwala Jewellers  ·  Luminique  ·  Karan Kothari Jewellers'),
+    bul('→ Ads Tracker — full campaign details', u(IDS.adsTracker)),
     div(),
-    h2('Active Campaigns'),
-    bul('Aarni — Awareness June 2026  ·  Meta Video  ·  Budget ₹25,000  ·  Live'),
-    bul('Beri — Conversion Campaign Q2  ·  Meta Carousel  ·  Budget ₹40,000  ·  Live'),
-    bul('Gujranwala — Bridal Season Ads  ·  Meta Static  ·  Budget ₹30,000  ·  Paused'),
-    div(),
-    h2('Clients on Ads'),
-    bul('Aarni by Sharavani — Meta'),
-    bul('Atul Jewellers — Meta'),
-    bul('Beri Jewellers — Meta'),
-    bul('Gujranwala Jewellers — Meta'),
-    bul('Luminique — Meta'),
-    bul('Karan Kothari Jewellers — Meta'),
+    h2('📊 Monthly Reports'),
+    h3('Recent Reports'),
+    bul('Aarni — May 2026  ·  Reach 48K  ·  Engagement 5.2%  ·  Sent to Client'),
+    bul('Luminique — May 2026  ·  Reach 72K  ·  Engagement 6.8%  ·  In Review'),
+    bul('→ Monthly Reports database', u(IDS.monthlyReports)),
   ]);
-  log(`  ✅ Performance Marketing → ${u(perf.id)}`);
+  log(`  ✅ Reporting page updated → ${u(IDS.reporting)}`);
 
   // ── 3. PROJECTS SECTION ───────────────────────────────────────────────────
   log('Building Projects section...');
@@ -322,20 +320,19 @@ async function main() {
   console.log('\n═══════════════════════════════════════════════════════════');
   console.log('   All pages filled with content!');
   console.log('═══════════════════════════════════════════════════════════');
-  console.log('\n🔗 New pages (created under Getting Started):');
+  console.log('\n🔗 New pages (under Getting Started — move to Grydco\'s HQ):');
   console.log(`   🏠 Founder Dashboard     → ${u(dash.id)}`);
-  console.log(`   📢 Perf. Marketing       → ${u(perf.id)}`);
   console.log(`   🎨 Projects              → ${u(proj.id)}`);
   console.log(`      🖌️  Branding Projects  → ${u(brandingProj.id)}`);
   console.log(`      🌐 Website Projects   → ${u(websiteProj.id)}`);
   console.log('\n📌 Already in Grydco\'s HQ (content added):');
+  console.log(`   📊 Reporting             → ${u(IDS.reporting)}  ← now has Ads + Reports`);
   console.log(`   👥 Clients → 🔗 Client Portal  → ${u(portal.id)}`);
   console.log(`   👥 Clients → 💎 All Brands     → ${u(brands.id)}`);
-  console.log('\n📌 Move these 3 pages to Grydco\'s HQ:');
+  console.log('\n📌 Move these 2 pages to Grydco\'s HQ:');
   console.log('   Right-click each in sidebar → Move to → Grydco\'s HQ');
   console.log('   1. 🏠 Founder Dashboard');
-  console.log('   2. 📢 Performance Marketing');
-  console.log('   3. 🎨 Projects');
+  console.log('   2. 🎨 Projects');
 }
 
 main().catch(err => {
