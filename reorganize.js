@@ -2,8 +2,8 @@ const https = require('https');
 
 const TOKEN  = process.env.NOTION_TOKEN;
 
-// Projects page inside Grydco's HQ teamspace — used to verify teamspace access
-const PROJECTS_PAGE_ID = '40d6b847-91e8-8310-8a7c-01dce87764a6';
+// "Getting Started" page — accessible root where we build everything
+const GETTING_STARTED_ID = '37b6b847-91e8-8025-99c1-f6185bd0fda7';
 
 if (!TOKEN) { console.error('Set NOTION_TOKEN first: set NOTION_TOKEN=ntn_xxx'); process.exit(1); }
 
@@ -72,24 +72,13 @@ async function api(method, path, body, retries = 3) {
 
 // ── API wrappers ──────────────────────────────────────────────────────────────
 
-// Create a page at Grydco's HQ teamspace root level
-async function createAtHQRoot(title, emoji) {
-  // First try workspace-level (places page at teamspace root alongside Projects/Tasks/etc)
-  try {
-    return await api('POST', 'pages', {
-      parent: { type: 'workspace', workspace: true },
-      icon: { type: 'emoji', emoji },
-      properties: { title: { title: [{ type: 'text', text: { content: title } }] } },
-    });
-  } catch (err) {
-    // Fallback: create inside Projects page if workspace-level is blocked
-    log(`  ⚠ Workspace root blocked (${err.message?.slice(0,60)}), creating inside teamspace page...`);
-    return await api('POST', 'pages', {
-      parent: { type: 'page_id', page_id: PROJECTS_PAGE_ID },
-      icon: { type: 'emoji', emoji },
-      properties: { title: { title: [{ type: 'text', text: { content: title } }] } },
-    });
-  }
+// Create a page under Getting Started (accessible root)
+function createAtHQRoot(title, emoji) {
+  return api('POST', 'pages', {
+    parent: { type: 'page_id', page_id: GETTING_STARTED_ID },
+    icon: { type: 'emoji', emoji },
+    properties: { title: { title: [{ type: 'text', text: { content: title } }] } },
+  });
 }
 
 const createPage = (parentId, title, emoji) => api('POST', 'pages', {
@@ -128,24 +117,8 @@ const callout = (t, emoji) => ({
 async function main() {
   log('Starting Gryd Co. workspace reorganisation...');
 
-  // ── 1. Verify teamspace access (Projects is a database, check accordingly) ─
-  log('Verifying access to Grydco\'s HQ teamspace...');
-  try {
-    // Projects is a database — try databases endpoint first, then pages
-    try { await api('GET', `databases/${PROJECTS_PAGE_ID}`); }
-    catch { await api('GET', `pages/${PROJECTS_PAGE_ID}`); }
-    log('✅ Teamspace access confirmed');
-  } catch (err) {
-    console.error('\n❌ Cannot access Grydco\'s HQ teamspace.');
-    console.error('Please:');
-    console.error('  1. In Notion, click "Projects" under Grydco\'s HQ');
-    console.error('  2. Click ... → Connections → enable Gryd Co. Build');
-    console.error('  3. Re-run: node reorganize.js');
-    process.exit(1);
-  }
-
-  // ── 2. Create 6 sections at Grydco's HQ root level ───────────────────────
-  log('Creating sections at Grydco\'s HQ root level...');
+  // ── 1. Create 6 sections under Getting Started ───────────────────────────
+  log('Creating 6 sections under Getting Started...');
   const dashPage = await createAtHQRoot('🏠 Founder Dashboard', '🏠');
   log(`  ✅ Founder Dashboard: ${dashPage.id}`);
   const clientsPage = await createAtHQRoot('👥 Clients', '👥');
@@ -242,18 +215,20 @@ async function main() {
   console.log('\n═══════════════════════════════════════════════════════');
   console.log('   Gryd Co. workspace reorganisation COMPLETE!');
   console.log('═══════════════════════════════════════════════════════');
-  console.log('\n✅ Done:');
-  console.log('   • 6 sections created at Grydco\'s HQ root level');
-  console.log('   • All databases moved into correct sections');
-  console.log('   • Client Portal, All Brands, Branding & Website Projects created');
-  console.log('   • 🏠 Founder Dashboard built with full content');
-  console.log('\n🔗 Open your workspace:');
-  console.log(`   🏠 Founder Dashboard        → ${u(dash.id)}`);
-  console.log(`   👥 Clients                  → ${u(clientsPage.id)}`);
-  console.log(`   ⚙️  Operations               → ${u(opsPage.id)}`);
-  console.log(`   📢 Performance Marketing    → ${u(perfPage.id)}`);
-  console.log(`   🎨 Projects                 → ${u(projPage.id)}`);
-  console.log(`   📊 Reporting                → ${u(reportPage.id)}`);
+  console.log('\n✅ Done! All 6 sections built under Getting Started.');
+  console.log('\n🔗 Your new pages:');
+  console.log(`   🏠 Founder Dashboard     → ${u(dash.id)}`);
+  console.log(`   👥 Clients               → ${u(clientsPage.id)}`);
+  console.log(`   ⚙️  Operations            → ${u(opsPage.id)}`);
+  console.log(`   📢 Performance Marketing → ${u(perfPage.id)}`);
+  console.log(`   🎨 Projects              → ${u(projPage.id)}`);
+  console.log(`   📊 Reporting             → ${u(reportPage.id)}`);
+  console.log('\n─────────────────────────────────────────────────────');
+  console.log('📌 FINAL STEP — Move pages to Grydco\'s HQ in Notion:');
+  console.log('   For each of the 6 pages above:');
+  console.log('   Right-click the page in the sidebar → "Move to" → select "Grydco\'s HQ"');
+  console.log('   (or drag them from under Getting Started to the Grydco\'s HQ section)');
+  console.log('─────────────────────────────────────────────────────');
 }
 
 main().catch(err => {
