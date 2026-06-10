@@ -265,7 +265,7 @@ function strategyBlocks(clientName, smm) {
     bul('Secondary CTA: [ ] Comment below  [ ] Share to stories  [ ] Reply to story poll'),
     bul('Offer / lead magnet this month: [see Lead Magnets section — note the specific offer to push this month]'),
     div(),
-    h2('🏛️ Content Pillars  (this month's focus per pillar)'),
+    h2('🏛️ Content Pillars  (focus per pillar this month)'),
     bul('Pillar 1 — Product Showcase: [which collections or pieces to feature — be specific]'),
     bul('Pillar 2 — Brand Story / Heritage: [what story angle — artisans / founder / legacy / craftsmanship]'),
     bul('Pillar 3 — Styling & Inspiration: [how-to-style, outfit pairing, occasion dressing for this month]'),
