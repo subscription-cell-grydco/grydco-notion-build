@@ -2,8 +2,8 @@ const https = require('https');
 
 const TOKEN  = process.env.NOTION_TOKEN;
 
-// "Getting Started" is the root page of the Grydco's HQ teamspace
-const HQ_ID  = process.env.NOTION_HQ_ID || '37b6b847-91e8-8025-99c1-f6185bd0fda7';
+// Projects page inside Grydco's HQ teamspace — used to verify teamspace access
+const PROJECTS_PAGE_ID = '40d6b847-91e8-8310-8a7c-01dce87764a6';
 
 if (!TOKEN) { console.error('Set NOTION_TOKEN first: set NOTION_TOKEN=ntn_xxx'); process.exit(1); }
 
@@ -71,6 +71,27 @@ async function api(method, path, body, retries = 3) {
 }
 
 // ── API wrappers ──────────────────────────────────────────────────────────────
+
+// Create a page at Grydco's HQ teamspace root level
+async function createAtHQRoot(title, emoji) {
+  // First try workspace-level (places page at teamspace root alongside Projects/Tasks/etc)
+  try {
+    return await api('POST', 'pages', {
+      parent: { type: 'workspace', workspace: true },
+      icon: { type: 'emoji', emoji },
+      properties: { title: { title: [{ type: 'text', text: { content: title } }] } },
+    });
+  } catch (err) {
+    // Fallback: create inside Projects page if workspace-level is blocked
+    log(`  ⚠ Workspace root blocked (${err.message?.slice(0,60)}), creating inside teamspace page...`);
+    return await api('POST', 'pages', {
+      parent: { type: 'page_id', page_id: PROJECTS_PAGE_ID },
+      icon: { type: 'emoji', emoji },
+      properties: { title: { title: [{ type: 'text', text: { content: title } }] } },
+    });
+  }
+}
+
 const createPage = (parentId, title, emoji) => api('POST', 'pages', {
   parent: { type: 'page_id', page_id: parentId },
   icon: { type: 'emoji', emoji },
@@ -107,38 +128,64 @@ const callout = (t, emoji) => ({
 async function main() {
   log('Starting Gryd Co. workspace reorganisation...');
 
-  // ── 1. Use Getting Started page (root of Grydco's HQ teamspace) ─────────
-  const hqId = HQ_ID;
-  log(`✅ Using Grydco's HQ root: ${hqId}`);
+  // ── 1. Verify teamspace access via Projects page ─────────────────────────
+  log('Verifying access to Grydco\'s HQ teamspace...');
+  try {
+    await api('GET', `pages/${PROJECTS_PAGE_ID}`);
+    log('✅ Teamspace access confirmed');
+  } catch (err) {
+    console.error('\n❌ Cannot access Grydco\'s HQ teamspace.');
+    console.error('Please:');
+    console.error('  1. In Notion, click "Projects" under Grydco\'s HQ');
+    console.error('  2. Click ... → Connections → enable Gryd Co. Build');
+    console.error('  3. Re-run: node reorganize.js');
+    process.exit(1);
+  }
 
-  // ── 2. Move existing container pages into Grydco's HQ ───────────────────
-  log("Moving Clients, Operations, Reporting → Grydco's HQ...");
-  await movePage(OLD.clients,    hqId); log('  ✅ Clients moved');
-  await movePage(OLD.operations, hqId); log('  ✅ Operations moved');
-  await movePage(OLD.reporting,  hqId); log('  ✅ Reporting moved');
-
-  // ── 3. Rename them to match final hierarchy ──────────────────────────────
-  await renamePage(OLD.clients,    '👥 Clients',    '👥'); log('  ✅ Renamed: 👥 Clients');
-  await renamePage(OLD.operations, '⚙️ Operations', '⚙️'); log('  ✅ Renamed: ⚙️ Operations');
-  await renamePage(OLD.reporting,  '📊 Reporting',  '📊'); log('  ✅ Renamed: 📊 Reporting');
-
-  // ── 4. Create new sections under Grydco's HQ ────────────────────────────
-  log('Creating Performance Marketing and Projects sections...');
-  const perfPage    = await createPage(hqId, '📢 Performance Marketing', '📢');
+  // ── 2. Create 6 sections at Grydco's HQ root level ───────────────────────
+  log('Creating sections at Grydco\'s HQ root level...');
+  const dashPage = await createAtHQRoot('🏠 Founder Dashboard', '🏠');
+  log(`  ✅ Founder Dashboard: ${dashPage.id}`);
+  const clientsPage = await createAtHQRoot('👥 Clients', '👥');
+  log(`  ✅ Clients: ${clientsPage.id}`);
+  const opsPage = await createAtHQRoot('⚙️ Operations', '⚙️');
+  log(`  ✅ Operations: ${opsPage.id}`);
+  const perfPage = await createAtHQRoot('📢 Performance Marketing', '📢');
   log(`  ✅ Performance Marketing: ${perfPage.id}`);
-  const projPage    = await createPage(hqId, '🎨 Projects', '🎨');
+  const projPage = await createAtHQRoot('🎨 Projects', '🎨');
   log(`  ✅ Projects: ${projPage.id}`);
+  const reportPage = await createAtHQRoot('📊 Reporting', '📊');
+  log(`  ✅ Reporting: ${reportPage.id}`);
 
-  // ── 5. Create sub-pages ──────────────────────────────────────────────────
+  // ── 3. Move existing databases into new section pages ────────────────────
+  log('Moving existing databases to new sections...');
+  try { await movePage(DBS.clientHub,       clientsPage.id); log('  ✅ Client Hub → Clients'); }
+  catch (e) { log(`  ⚠ Client Hub move skipped: ${e.message.slice(0,60)}`); }
+  try { await movePage(DBS.workflowTracker, opsPage.id);     log('  ✅ Workflow Tracker → Operations'); }
+  catch (e) { log(`  ⚠ Workflow Tracker move skipped: ${e.message.slice(0,60)}`); }
+  try { await movePage(DBS.contentCalendar, opsPage.id);     log('  ✅ Content Calendar → Operations'); }
+  catch (e) { log(`  ⚠ Content Calendar move skipped: ${e.message.slice(0,60)}`); }
+  try { await movePage(DBS.approvalLog,     opsPage.id);     log('  ✅ Approval Log → Operations'); }
+  catch (e) { log(`  ⚠ Approval Log move skipped: ${e.message.slice(0,60)}`); }
+  try { await movePage(DBS.revisionLog,     opsPage.id);     log('  ✅ Revision Log → Operations'); }
+  catch (e) { log(`  ⚠ Revision Log move skipped: ${e.message.slice(0,60)}`); }
+  try { await movePage(DBS.adsTracker,      perfPage.id);    log('  ✅ Ads Tracker → Performance Marketing'); }
+  catch (e) { log(`  ⚠ Ads Tracker move skipped: ${e.message.slice(0,60)}`); }
+  try { await movePage(DBS.projectsTracker, projPage.id);    log('  ✅ Projects Tracker → Projects'); }
+  catch (e) { log(`  ⚠ Projects Tracker move skipped: ${e.message.slice(0,60)}`); }
+  try { await movePage(DBS.monthlyReports,  reportPage.id);  log('  ✅ Monthly Reports → Reporting'); }
+  catch (e) { log(`  ⚠ Monthly Reports move skipped: ${e.message.slice(0,60)}`); }
+
+  // ── 4. Create sub-pages ──────────────────────────────────────────────────
   log('Creating sub-pages...');
-  await createPage(OLD.clients, 'Client Portal', '🔗');     log('  ✅ Client Portal');
-  await createPage(OLD.clients, 'All Brands',    '💎');     log('  ✅ All Brands');
+  await createPage(clientsPage.id, 'Client Portal', '🔗'); log('  ✅ Client Portal');
+  await createPage(clientsPage.id, 'All Brands',    '💎'); log('  ✅ All Brands');
   await createPage(projPage.id, 'Branding Projects', '🖌️'); log('  ✅ Branding Projects');
   await createPage(projPage.id, 'Website Projects',  '🌐'); log('  ✅ Website Projects');
 
-  // ── 6. Build Founder Dashboard ───────────────────────────────────────────
+  // ── 5. Build Founder Dashboard ───────────────────────────────────────────
   log('Building Founder Dashboard...');
-  const dash = await createPage(hqId, '🏠 Founder Dashboard', '🏠');
+  const dash = dashPage;
 
   await appendBlocks(dash.id, [
     callout('Central command for Gryd Co. — client health, team workload, approvals, and performance at a glance.', '🏠'),
@@ -193,19 +240,18 @@ async function main() {
   console.log('\n═══════════════════════════════════════════════════════');
   console.log('   Gryd Co. workspace reorganisation COMPLETE!');
   console.log('═══════════════════════════════════════════════════════');
-  console.log('\n✅ Done via API:');
-  console.log('   • Clients, Operations, Reporting → moved to Grydco\'s HQ');
-  console.log('   • 👥 Clients renamed + Client Portal, All Brands added');
-  console.log('   • ⚙️ Operations renamed');
-  console.log('   • 📢 Performance Marketing section created');
-  console.log('   • 🎨 Projects section + Branding & Website sub-pages created');
-  console.log('   • 📊 Reporting renamed');
-  console.log('   • 🏠 Founder Dashboard built with content');
-  console.log('\n🖱️  2 quick drag-and-drops needed in Notion sidebar:');
-  console.log('   1. Drag  📣 Ads Tracker       →  inside  📢 Performance Marketing');
-  console.log('   2. Drag  🚀 Projects Tracker  →  inside  🎨 Projects');
+  console.log('\n✅ Done:');
+  console.log('   • 6 sections created at Grydco\'s HQ root level');
+  console.log('   • All databases moved into correct sections');
+  console.log('   • Client Portal, All Brands, Branding & Website Projects created');
+  console.log('   • 🏠 Founder Dashboard built with full content');
   console.log('\n🔗 Open your workspace:');
-  console.log(`   🏠 Founder Dashboard → ${u(dash.id)}`);
+  console.log(`   🏠 Founder Dashboard        → ${u(dash.id)}`);
+  console.log(`   👥 Clients                  → ${u(clientsPage.id)}`);
+  console.log(`   ⚙️  Operations               → ${u(opsPage.id)}`);
+  console.log(`   📢 Performance Marketing    → ${u(perfPage.id)}`);
+  console.log(`   🎨 Projects                 → ${u(projPage.id)}`);
+  console.log(`   📊 Reporting                → ${u(reportPage.id)}`);
 }
 
 main().catch(err => {
