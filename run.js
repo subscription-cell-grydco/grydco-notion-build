@@ -63,7 +63,7 @@ const num = t => ({ type:'numbered_list_item', numbered_list_item:{ rich_text:[{
 const co  = (t, e) => ({ type:'callout', callout:{ rich_text:[{type:'text',text:{content:t}}], icon:{type:'emoji',emoji:e} } });
 const tog = (t, ch) => ({ type:'toggle', toggle:{ rich_text:[{type:'text',text:{content:t}}], children:ch } });
 const row = cells => ({ type:'table_row', table_row:{ cells: cells.map(c => [{type:'text',text:{content:String(c)}}]) } });
-const tbl = (w, hdr, rows) => ({ type:'table', table:{ table_width:w, has_column_header:hdr, has_row_header:false }, children: rows });
+const tbl = (w, hdr, rows) => ({ type:'table', table:{ table_width:w, has_column_header:hdr, has_row_header:false, children: rows } });
 
 // ── Calendar data ──────────────────────────────────────────────────────────
 const CAL = {
