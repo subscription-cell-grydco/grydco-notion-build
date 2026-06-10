@@ -10,32 +10,51 @@ if (!TOKEN) {
 
 // ─── HTTP helper ─────────────────────────────────────────────────────────────
 
-function api(method, path, body) {
-  return new Promise((resolve, reject) => {
-    const data = JSON.stringify(body || {});
-    const req = https.request({
-      hostname: 'api.notion.com',
-      path: `/v1/${path}`,
-      method,
-      headers: {
-        'Authorization': `Bearer ${TOKEN}`,
-        'Content-Type': 'application/json',
-        'Notion-Version': '2022-06-28',
-        'Content-Length': Buffer.byteLength(data),
-      },
-    }, res => {
-      let raw = '';
-      res.on('data', c => raw += c);
-      res.on('end', () => {
-        const parsed = JSON.parse(raw);
-        if (res.statusCode >= 200 && res.statusCode < 300) resolve(parsed);
-        else reject(Object.assign(new Error(parsed.message || raw), { status: res.statusCode, body: parsed }));
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function api(method, path, body, retries = 3) {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const result = await new Promise((resolve, reject) => {
+        const data = JSON.stringify(body || {});
+        const req = https.request({
+          hostname: 'api.notion.com',
+          path: `/v1/${path}`,
+          method,
+          timeout: 30000,
+          headers: {
+            'Authorization': `Bearer ${TOKEN}`,
+            'Content-Type': 'application/json',
+            'Notion-Version': '2022-06-28',
+            'Content-Length': Buffer.byteLength(data),
+          },
+        }, res => {
+          let raw = '';
+          res.on('data', c => raw += c);
+          res.on('end', () => {
+            try {
+              const parsed = JSON.parse(raw);
+              if (res.statusCode === 429) { reject(Object.assign(new Error('rate_limited'), { retry: true })); return; }
+              if (res.statusCode >= 200 && res.statusCode < 300) resolve(parsed);
+              else reject(Object.assign(new Error(parsed.message || raw), { status: res.statusCode, body: parsed }));
+            } catch (e) { reject(new Error(`Bad JSON: ${raw.slice(0, 200)}`)); }
+          });
+        });
+        req.on('timeout', () => { req.destroy(); reject(Object.assign(new Error('Request timed out'), { retry: true })); });
+        req.on('error', reject);
+        req.write(data);
+        req.end();
       });
-    });
-    req.on('error', reject);
-    req.write(data);
-    req.end();
-  });
+      await sleep(350); // avoid rate limits
+      return result;
+    } catch (err) {
+      if (err.retry && attempt < retries) {
+        const wait = (attempt + 1) * 2000;
+        log(`  ⚠ Retrying in ${wait/1000}s... (${err.message})`);
+        await sleep(wait);
+      } else { throw err; }
+    }
+  }
 }
 
 function log(msg) { console.log(`[${new Date().toISOString().slice(11,19)}] ${msg}`); }
