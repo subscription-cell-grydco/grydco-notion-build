@@ -13,19 +13,39 @@ function log(msg) {
   console.log(`[${new Date().toISOString()}] ${msg}`);
 }
 
-async function createPage(parentId, title, emoji) {
-  return notion.pages.create({
-    parent: parentId ? { page_id: parentId } : { type: 'workspace', workspace: true },
-    icon: { type: 'emoji', emoji },
-    properties: {
-      title: { title: [{ text: { content: title } }] },
-    },
-  });
+async function findOrCreateParent() {
+  // Check if user supplied a parent page ID explicitly
+  if (process.env.NOTION_PARENT_ID) {
+    log(`Using supplied parent page: ${process.env.NOTION_PARENT_ID}`);
+    return process.env.NOTION_PARENT_ID;
+  }
+
+  // Search for any page the integration can already access
+  log('Searching for an accessible Notion page to use as parent...');
+  const results = await notion.search({ filter: { value: 'page', property: 'object' }, page_size: 10 });
+
+  // Prefer a page (not a database) that looks like a root page
+  const page = results.results.find(r => r.object === 'page');
+  if (page) {
+    const title = page.properties?.title?.title?.[0]?.plain_text || page.id;
+    log(`Found existing page: "${title}" (${page.id}) — will build inside it.`);
+    return page.id;
+  }
+
+  throw new Error(
+    'No accessible pages found.\n\n' +
+    'Please do ONE of the following:\n' +
+    '  A) Open Notion (app or browser), create any new page, click "..." → Connections → enable your integration.\n' +
+    '     Then re-run: node build.js\n\n' +
+    '  B) Or supply the parent page ID directly:\n' +
+    '     set NOTION_PARENT_ID=<paste-page-id-here>\n' +
+    '     node build.js'
+  );
 }
 
-async function createTopLevelPage(title, emoji) {
+async function createTopLevelPage(parentId, title, emoji) {
   return notion.pages.create({
-    parent: { type: 'workspace', workspace: true },
+    parent: { page_id: parentId },
     icon: { type: 'emoji', emoji },
     properties: {
       title: { title: [{ text: { content: title } }] },
@@ -573,13 +593,16 @@ async function seedReports(dbId) {
 async function main() {
   log('🚀 Starting Gryd Co. Notion workspace build...\n');
 
+  // STEP 0: Find a parent page the integration can write to
+  const parentId = await findOrCreateParent();
+
   // STEP 1: Create top-level pages
   log('── STEP 1: Creating top-level pages ──');
-  const clientsPage    = await createTopLevelPage('Clients',    '🏢');
+  const clientsPage    = await createTopLevelPage(parentId, 'Clients',    '🏢');
   log(`✅ Created page: Clients (${clientsPage.id})`);
-  const opsPage        = await createTopLevelPage('Operations', '⚙️');
+  const opsPage        = await createTopLevelPage(parentId, 'Operations', '⚙️');
   log(`✅ Created page: Operations (${opsPage.id})`);
-  const reportingPage  = await createTopLevelPage('Reporting',  '📊');
+  const reportingPage  = await createTopLevelPage(parentId, 'Reporting',  '📊');
   log(`✅ Created page: Reporting (${reportingPage.id})`);
 
   // STEP 2: Create all 8 databases
